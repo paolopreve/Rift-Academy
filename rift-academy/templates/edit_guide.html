@@ -1,0 +1,39 @@
+<h1>Modifica guida</h1>
+{{errors}}
+<form action="edit_guide.php" method="post" data-validate="data-validate">
+  {{csrf}}
+  <input type="hidden" name="id" value="{{guide_id}}" />
+  <p>
+    <label for="title">Titolo (obbligatorio)</label>
+    <input id="title" name="title" type="text" required="required" data-minlength="5" />
+  </p>
+  <p>
+    <label for="champion_id">Campione (obbligatorio)</label>
+    <select id="champion_id" name="champion_id" required="required">
+      {{champion_options}}
+    </select>
+  </p>
+  <p>
+    <label for="role_id">Ruolo (obbligatorio)</label>
+    <select id="role_id" name="role_id" required="required">
+      {{role_options}}
+    </select>
+  </p>
+  <p>
+    <label for="patch">Patch di riferimento (obbligatoria, es. 14.10)</label>
+    <input id="patch" name="patch" type="text" required="required" />
+  </p>
+  <fieldset>
+    <legend>Oggetti</legend>
+    {{item_checkboxes}}
+  </fieldset>
+  <fieldset>
+    <legend>Rune</legend>
+    {{rune_checkboxes}}
+  </fieldset>
+  <p>
+    <label for="strategy_text">Strategia (obbligatoria, testo libero)</label>
+    <textarea id="strategy_text" name="strategy_text" rows="10" cols="60" required="required" data-minlength="20"></textarea>
+  </p>
+  <p><button type="submit">Salva modifiche</button></p>
+</form>

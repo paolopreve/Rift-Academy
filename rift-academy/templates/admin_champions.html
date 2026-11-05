@@ -1,0 +1,22 @@
+<h1>Catalogo campioni</h1>
+{{errors}}
+<form action="admin_champions.php" method="post" data-validate="data-validate">
+  {{csrf}}
+  <p>
+    <label for="name">Nome del campione (obbligatorio)</label>
+    <input id="name" name="name" type="text" required="required" />
+  </p>
+  <p>
+    <label for="image_path">Percorso immagine (obbligatorio, es. img/champions/Ahri.png)</label>
+    <input id="image_path" name="image_path" type="text" required="required" />
+  </p>
+  <fieldset>
+    <legend>Ruoli</legend>
+    {{role_checkboxes}}
+  </fieldset>
+  <p><button type="submit">Salva campione</button></p>
+</form>
+<section aria-labelledby="elenco-campioni">
+  <h2 id="elenco-campioni">Campioni nel catalogo</h2>
+  {{champions_table}}
+</section>

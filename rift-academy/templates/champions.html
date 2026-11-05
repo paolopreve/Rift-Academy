@@ -1,0 +1,12 @@
+<h1>Campioni</h1>
+<form action="champions.php" method="get">
+  <label for="role">Filtra per ruolo</label>
+  <select id="role" name="role">
+    {{role_options}}
+  </select>
+  <button type="submit">Filtra</button>
+</form>
+<section aria-labelledby="elenco-campioni">
+  <h2 id="elenco-campioni">Elenco</h2>
+  {{champions_list}}
+</section>

@@ -1,0 +1,19 @@
+<h1>Registrati</h1>
+{{errors}}
+<form action="register.php" method="post" data-validate="data-validate">
+  {{csrf}}
+  <p>
+    <label for="username">Nome utente (obbligatorio, almeno 3 caratteri)</label>
+    <input id="username" name="username" type="text" required="required" data-minlength="3" autocomplete="username" />
+  </p>
+  <p>
+    <label for="email">Email (obbligatoria)</label>
+    <input id="email" name="email" type="email" required="required" autocomplete="email" />
+  </p>
+  <p>
+    <label for="password">Password (obbligatoria, almeno 8 caratteri)</label>
+    <input id="password" name="password" type="password" required="required" data-minlength="8" autocomplete="new-password" />
+  </p>
+  <p><button type="submit">Crea account</button></p>
+</form>
+<p>Hai già un account? <a href="login.php">Accedi</a></p>

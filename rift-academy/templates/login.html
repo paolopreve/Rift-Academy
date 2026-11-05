@@ -1,0 +1,15 @@
+<h1>Accedi</h1>
+{{errors}}
+<form action="login.php" method="post" data-validate="data-validate">
+  {{csrf}}
+  <p>
+    <label for="username">Nome utente (obbligatorio)</label>
+    <input id="username" name="username" type="text" required="required" autocomplete="username" />
+  </p>
+  <p>
+    <label for="password">Password (obbligatoria)</label>
+    <input id="password" name="password" type="password" required="required" autocomplete="current-password" />
+  </p>
+  <p><button type="submit">Accedi</button></p>
+</form>
+<p>Non hai un account? <a href="register.php">Registrati</a></p>

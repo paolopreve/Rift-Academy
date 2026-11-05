@@ -1,0 +1,7 @@
+# Pagina di errore 404 personalizzata.
+# Su Apache ErrorDocument richiede un percorso che parte da "/": sostituire con
+# il percorso reale sul server del corso e togliere il commento.
+# ErrorDocument 404 /~NOME_UTENTE/rift-academy/404.php
+
+# Codifica predefinita
+AddDefaultCharset UTF-8
