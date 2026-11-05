@@ -241,4 +241,4 @@ Il sito va installato su `tecweb.studenti.math.unipd.it`, nella home di uno dei 
 ## 👨‍💻 Autori & Corso
 
 Progetto sviluppato dal gruppo di lavoro per l'insegnamento di **Tecnologie Web**  
-**Università degli Studi di Padova** — *Anno Accademico 2025/2026*
+**Università degli Studi di Padova** — *Anno Accademico 2026/2027*
