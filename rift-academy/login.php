@@ -13,12 +13,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $username = post_str('username');
     $password = isset($_POST['password']) && is_string($_POST['password']) ? $_POST['password'] : '';
 
-    // TODO: validazione lato server dei campi
-    // TODO: SELECT dell'utente per username con prepared statement
-    // TODO: password_verify($password, $row['password_hash'])
-    // TODO: rifiutare se $row['status'] !== 'active' (utente sospeso)
-    // TODO: login_user($row); flash_set('Accesso eseguito.'); redirect('profile.php');
-    // Usare un messaggio unico per credenziali errate (non rivelare quale campo e' sbagliato).
+    // Validazione lato server dei camp
+    if (empty($username) || empty($password)) {
+        $errors[] = 'Compilare tutti i campi.';
+    }
+
+    if (empty($errors)) {
+        // SELECT dell'utente per username con prepared statement
+        $stmt = db()->prepare('SELECT id, username, password_hash, status FROM users WHERE username = ?');
+        $stmt->execute([$username]);
+        $row = $stmt->fetch();
+
+        // Verifica password e stato utente
+        if ($row && password_verify($password, $row['password_hash']) && $row['status'] === 'active') {
+            login_user($row);
+            flash_set('Accesso eseguito.');
+            redirect('profile.php');
+        } else {
+            $errors[] = 'Credenziali non valide.';
+        }
+    }
 }
 
 render_page('templates/login.html', [

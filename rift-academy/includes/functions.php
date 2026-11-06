@@ -22,9 +22,19 @@ function require_post(): void
     }
 }
 
+function get_string(string $key): string
+{
+    return isset($_GET[$key]) ? trim($_GET[$key]) : '';
+}
+
 function post_str(string $key): string
 {
     return isset($_POST[$key]) && is_string($_POST[$key]) ? trim($_POST[$key]) : '';
+}
+
+function post_arr(string $key): array
+{
+ return isset($_POST[$key]) && is_array($_POST[$key]) ? $_POST[$key] : [];
 }
 
 function get_int(string $key): int
