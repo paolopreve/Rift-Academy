@@ -1,0 +1,31 @@
+services:
+  web:
+    build: .
+    container_name: rift_web
+    ports:
+      - "8080:80"
+    volumes:
+      - ./rift-academy:/var/www/html
+    environment:
+      - DB_HOST=db
+      - DB_NAME=rift_academy
+      - DB_USER=root
+      - DB_PASS=rootpassword
+    depends_on:
+      - db
+
+  db:
+    image: mysql:8.0
+    container_name: rift_db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: rift_academy
+    ports:
+      - "3306:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+      - ./rift-academy/sql:/docker-entrypoint-initdb.d
+
+volumes:
+  db_data:

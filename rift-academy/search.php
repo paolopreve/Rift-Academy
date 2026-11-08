@@ -3,61 +3,49 @@
 require_once 'includes/auth.php';
 require_once 'includes/db.php';
 
-// Leggere 'q' da GET, validare
-$searchQuery = trim(get_string('q'));
+$searchQuery = get_string('q');
 $resultsHtml = '';
 
-if (!empty($searchQuery)) {
-    // Cercare con prepared statement (LIKE)
-    // Usare LIKE per cercare nel titolo delle guide e nel nome dei campioni
-    $searchPattern = '%' . $searchQuery . '%';
+if ($searchQuery === '') {
+    $resultsHtml = '<p>Inserisci un termine da cercare nel campo di ricerca.</p>';
+} else {
+    // Escape di \, % e _ nel testo cercato, poi il pattern viene passato come parametro
+    $escaped = str_replace(['\\', '%', '_'], ['\\\\', '\\%', '\\_'], $searchQuery);
+    $searchPattern = '%' . $escaped . '%';
 
-    // Query per le guide
-    $guideStmt = db()->prepare("
-        SELECT g.id, g.title, c.name AS champion_name, r.name AS role_name
-        FROM guides g
-        JOIN champions c ON g.champion_id = c.id
-        JOIN roles r ON g.role_id = r.id
-        WHERE g.title LIKE ?
-    ");
+    $guideStmt = db()->prepare('SELECT g.id, g.title, c.name AS champion_name, r.name AS role_name
+                                FROM guides g
+                                JOIN champions c ON g.champion_id = c.id
+                                JOIN roles r ON g.role_id = r.id
+                                WHERE g.title LIKE ?
+                                ORDER BY g.created_at DESC');
     $guideStmt->execute([$searchPattern]);
     $guides = $guideStmt->fetchAll();
 
-    // Query per i campioni
-    $championStmt = db()->prepare("
-        SELECT c.id, c.name AS champion_name
-        FROM champions c
-        WHERE c.name LIKE ?
-    ");
+    $championStmt = db()->prepare('SELECT id, name FROM champions WHERE name LIKE ? ORDER BY name');
     $championStmt->execute([$searchPattern]);
     $champions = $championStmt->fetchAll();
 
-    // Costruire l'HTML dei risultati
     if (!empty($guides)) {
-        $resultsHtml .= '<h2>Risultati delle guide</h2>';
-        $resultsHtml .= '<ul>';
+        $resultsHtml .= '<h2>Guide</h2><ul>';
         foreach ($guides as $guide) {
-            $resultsHtml .= '<li>';
-            $resultsHtml .= '<a href="guide.php?id=' . e($guide['id']) . '">' . e($guide['title']) . '</a>';
-            $resultsHtml .= ' - Campione: ' . e($guide['champion_name']) . ', Ruolo: ' . e($guide['role_name']);
-            $resultsHtml .= '</li>';
+            $resultsHtml .= '<li><a href="guide_detail.php?id=' . e($guide['id']) . '">' . e($guide['title']) . '</a>';
+            $resultsHtml .= ' - Campione: ' . e($guide['champion_name']) . ', Ruolo: ' . e($guide['role_name']) . '</li>';
         }
         $resultsHtml .= '</ul>';
     }
 
     if (!empty($champions)) {
-        $resultsHtml .= '<h2>Risultati dei campioni</h2>';
-        $resultsHtml .= '<ul>';
+        $resultsHtml .= '<h2>Campioni</h2><ul>';
         foreach ($champions as $champion) {
-            $resultsHtml .= '<li>';
-            $resultsHtml .= '<a href="champion.php?id=' . e($champion['id']) . '">' . e($champion['champion_name']) . '</a>';
-            $resultsHtml .= '</li>';
+            $resultsHtml .= '<li>' . e($champion['name']) . '</li>';
         }
         $resultsHtml .= '</ul>';
+        $resultsHtml .= '<p><a href="champions.php">Vai al catalogo dei campioni</a></p>';
     }
 
     if (empty($guides) && empty($champions)) {
-        $resultsHtml .= '<p>Nessun risultato trovato per la query: ' . e($searchQuery) . '</p>';
+        $resultsHtml = '<p>Nessun risultato trovato.</p>';
     }
 }
 
@@ -65,6 +53,6 @@ render_page('templates/search.html', [
     'title'       => 'Cerca - Rift Academy',
     'description' => 'Risultati della ricerca su guide e campioni.',
 ], [
-    'query' => $searchQuery,
+    'query'   => e($searchQuery),
     'results' => $resultsHtml,
 ]);

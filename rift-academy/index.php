@@ -3,7 +3,7 @@
 require_once 'includes/auth.php';
 require_once 'includes/db.php';
 
-// Leggere le ultime guide (ORDER BY created_at DESC LIMIT 6) con prepared statement
+// Ultime 6 guide di utenti attivi
 $stmt = db()->prepare('SELECT g.id, g.title, g.strategy_text, g.created_at, c.name AS champion_name, r.name AS role_name, u.username AS author_name
                        FROM guides g
                        JOIN champions c ON g.champion_id = c.id
@@ -15,18 +15,21 @@ $stmt = db()->prepare('SELECT g.id, g.title, g.strategy_text, g.created_at, c.na
 $stmt->execute(['active']);
 $latestGuides = $stmt->fetchAll();
 
-// Costruire l'HTML delle card, usando e() per ogni dato utente
+// HTML delle card: ogni dato utente passa da e()
 $latestGuidesHtml = '';
 foreach ($latestGuides as $guide) {
-    $latestGuidesHtml .= '<div class="guide-card">';
-    $latestGuidesHtml .= '<h2>' . e($guide['title']) . '</h2>';
+    $latestGuidesHtml .= '<article class="guide-card">';
+    $latestGuidesHtml .= '<h3>' . e($guide['title']) . '</h3>';
     $latestGuidesHtml .= '<p>' . e($guide['strategy_text']) . '</p>';
     $latestGuidesHtml .= '<p><strong>Campione:</strong> ' . e($guide['champion_name']) . '</p>';
     $latestGuidesHtml .= '<p><strong>Ruolo:</strong> ' . e($guide['role_name']) . '</p>';
     $latestGuidesHtml .= '<p><strong>Autore:</strong> ' . e($guide['author_name']) . '</p>';
     $latestGuidesHtml .= '<p><strong>Data:</strong> ' . e($guide['created_at']) . '</p>';
-    $latestGuidesHtml .= '<a href="guide.php?id=' . e($guide['id']) . '">Leggi la guida completa</a>';
-    $latestGuidesHtml .= '</div>';
+    $latestGuidesHtml .= '<p><a href="guide_detail.php?id=' . e($guide['id']) . '">Leggi la guida completa: ' . e($guide['title']) . '</a></p>';
+    $latestGuidesHtml .= '</article>';
+}
+if ($latestGuidesHtml === '') {
+    $latestGuidesHtml = '<p>Non ci sono ancora guide pubblicate.</p>';
 }
 
 render_page('templates/index.html', [

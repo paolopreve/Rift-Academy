@@ -8,11 +8,17 @@ function db(): PDO
 {
     static $pdo = null;
     if ($pdo === null) {
+        // Legge le variabili d'ambiente (Docker) con fallback sulle costanti di config.php o localhost
+        $host = getenv('DB_HOST') ?: (defined('DB_HOST') ? DB_HOST : 'localhost');
+        $db   = getenv('DB_NAME') ?: (defined('DB_NAME') ? DB_NAME : 'rift_academy');
+        $user = getenv('DB_USER') ?: (defined('DB_USER') ? DB_USER : 'root');
+        $pass = getenv('DB_PASS') ?: (defined('DB_PASS') ? DB_PASS : '');
+
         try {
             $pdo = new PDO(
-                'mysql:host=' . DB_HOST . ';dbname=' . DB_NAME . ';charset=utf8mb4',
-                DB_USER,
-                DB_PASS,
+                "mysql:host=$host;dbname=$db;charset=utf8mb4",
+                $user,
+                $pass,
                 [
                     PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
                     PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,

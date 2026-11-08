@@ -8,40 +8,54 @@ require_post();
 csrf_check();
 
 $action = post_str('action');
-$guide_id = get_int('guide_id');
-$comment_id = get_int('comment_id');
-$body = post_str('body');
 
 if ($action === 'create') {
-    if (empty($body)) {
-        flash_set('Il commento non pu\u00f2 essere vuoto.');
-        redirect("guide_detail.php?id={$guide_id}");
-    }
+    $guide_id = (int) post_str('guide_id');
+    $body = post_str('body');
 
-    $stmt = db()->prepare('INSERT INTO comments (user_id, guide_id, body, created_at) VALUES (:user_id, :guide_id, :body, NOW())');
-    $stmt->execute([
-        ':user_id' => current_user()['id'],
-        ':guide_id' => $guide_id,
-        ':body' => $body,
-    ]);
-
-    flash_set('Commento aggiunto con successo.');
-} elseif ($action === 'delete') {
-    $stmt = db()->prepare('SELECT user_id FROM comments WHERE id = :comment_id');
-    $stmt->execute([':comment_id' => $comment_id]);
-    $comment = $stmt->fetch();
-
-    if (!$comment || !is_owner_or_admin($comment['user_id'])) {
-        flash_set('Non hai i permessi per eliminare questo commento.');
+    $stmt = db()->prepare('SELECT id FROM guides WHERE id = ?');
+    $stmt->execute([$guide_id]);
+    if (!$stmt->fetch()) {
+        flash_set('Guida non trovata.');
         redirect('index.php');
     }
 
-    $stmt = db()->prepare('DELETE FROM comments WHERE id = :comment_id');
-    $stmt->execute([':comment_id' => $comment_id]);
+    if ($body === '' || strlen($body) > 2000) {
+        flash_set('Il commento non può essere vuoto né superare 2000 caratteri.');
+        redirect('guide_detail.php?id=' . $guide_id);
+    }
 
-    flash_set('Commento eliminato con successo.');
-} else {
-    flash_set('Azione non valida.');
+    $stmt = db()->prepare('INSERT INTO comments (guide_id, user_id, body) VALUES (?, ?, ?)');
+    $stmt->execute([$guide_id, current_user()['id'], $body]);
+
+    flash_set('Commento aggiunto.');
+    redirect('guide_detail.php?id=' . $guide_id);
 }
 
-redirect("guide_detail.php?id={$guide_id}");
+if ($action === 'delete') {
+    $comment_id = (int) post_str('comment_id');
+
+    $stmt = db()->prepare('SELECT id, guide_id, user_id FROM comments WHERE id = ?');
+    $stmt->execute([$comment_id]);
+    $comment = $stmt->fetch();
+
+    if (!$comment) {
+        flash_set('Commento non trovato.');
+        redirect('index.php');
+    }
+
+    // Solo l'autore del commento o un admin
+    if (!is_owner_or_admin((int) $comment['user_id'])) {
+        http_response_code(403);
+        exit('Accesso negato.');
+    }
+
+    $stmt = db()->prepare('DELETE FROM comments WHERE id = ?');
+    $stmt->execute([$comment_id]);
+
+    flash_set('Commento eliminato.');
+    redirect('guide_detail.php?id=' . (int) $comment['guide_id']);
+}
+
+flash_set('Azione non valida.');
+redirect('index.php');

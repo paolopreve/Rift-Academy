@@ -14,40 +14,38 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $email = post_str('email');
     $password = isset($_POST['password']) && is_string($_POST['password']) ? $_POST['password'] : '';
 
-    // Validazione lato server
-    if (strlen($username) < 3 || strlen($username) > 20) {
-        $errors[] = 'Il nome utente deve avere tra 3 e 20 caratteri.';
+    // Validazione lato server (stessi limiti del template e dello schema)
+    if (strlen($username) < 3 || strlen($username) > 30) {
+        $errors[] = 'Il nome utente deve avere tra 3 e 30 caratteri.';
     }
-    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-        $errors[] = 'Inserisci un indirizzo email valido.';
+    if (strlen($email) > 100 || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        $errors[] = 'Inserisci un indirizzo email valido (massimo 100 caratteri).';
     }
-    if (strlen($password) < 6) {
-        $errors[] = 'La password deve avere almeno 6 caratteri.';
+    if (strlen($password) < 8) {
+        $errors[] = 'La password deve avere almeno 8 caratteri.';
     }
 
     if (empty($errors)) {
-        // Controllare che username ed email non esistano già
+        // Controlla che username ed email non esistano già
         $stmt = db()->prepare('SELECT id FROM users WHERE username = ? OR email = ?');
         $stmt->execute([$username, $email]);
-        $userExists = $stmt->fetch();
 
-        if ($userExists) {
-            $errors[] = 'Username o email già in uso.';
+        if ($stmt->fetch()) {
+            $errors[] = 'Nome utente o email già in uso: scegline un altro.';
         } else {
-            // INSERT con prepared statement e password_hash($password, PASSWORD_DEFAULT)
-            $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
-            $stmt = db()->prepare('INSERT INTO users (username, email, password_hash, role, status) VALUES (?, ?, ?, ?, ?)');
-            $stmt->execute([$username, $email, $hashedPassword, 'user', 'active']);
+            try {
+                $hash = password_hash($password, PASSWORD_DEFAULT);
+                $stmt = db()->prepare('INSERT INTO users (username, email, password_hash, role, status) VALUES (?, ?, ?, ?, ?)');
+                $stmt->execute([$username, $email, $hash, 'user', 'active']);
 
-            $userId = db()->lastInsertId();
-            if ($userId) {
-                $stmt = db()->prepare('SELECT id, username, password_hash, status FROM users WHERE id = ?');
-                $stmt->execute([$userId]);
-                $userRow = $stmt->fetch();
-                login_user($userRow);
+                // Login automatico: serve il ruolo per la sessione
+                $stmt = db()->prepare('SELECT id, username, role FROM users WHERE id = ?');
+                $stmt->execute([(int) db()->lastInsertId()]);
+                login_user($stmt->fetch());
                 flash_set('Registrazione completata. Benvenuto su Rift Academy!');
                 redirect('profile.php');
-            } else {
+            } catch (PDOException $ex) {
+                error_log($ex->getMessage());
                 $errors[] = 'Errore durante la registrazione. Riprova più tardi.';
             }
         }

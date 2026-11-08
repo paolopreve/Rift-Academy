@@ -5,20 +5,43 @@ require_once 'includes/db.php';
 
 require_login();
 
+// L'id arriva sempre dalla query string (anche dopo l'invio del form)
 $guide_id = get_int('id');
 
 $stmt = db()->prepare('SELECT * FROM guides WHERE id = ?');
 $stmt->execute([$guide_id]);
 $guide = $stmt->fetch();
 
-if (!$guide || !is_owner_or_admin((int) $guide['user_id'])) {
-    http_response_code(403);
-    echo 'Accesso negato.';
+if (!$guide) {
+    require '404.php';
     exit;
 }
+if (!is_owner_or_admin((int) $guide['user_id'])) {
+    http_response_code(403);
+    exit('Accesso negato.');
+}
 
-$csrf = csrf_field();
 $errors = [];
+
+$champions = db()->query('SELECT id, name FROM champions ORDER BY name')->fetchAll();
+$roles = db()->query('SELECT id, name FROM roles ORDER BY id')->fetchAll();
+$items = db()->query('SELECT id, name FROM items ORDER BY name')->fetchAll();
+$runes = db()->query('SELECT id, name FROM runes ORDER BY name')->fetchAll();
+
+// Valori iniziali: quelli salvati nel database
+$title = $guide['title'];
+$strategy_text = $guide['strategy_text'];
+$patch = $guide['patch'];
+$champion_id = (int) $guide['champion_id'];
+$role_id = (int) $guide['role_id'];
+
+$stmt = db()->prepare('SELECT item_id FROM guide_items WHERE guide_id = ? ORDER BY position');
+$stmt->execute([$guide_id]);
+$item_ids = array_map('intval', array_column($stmt->fetchAll(), 'item_id'));
+
+$stmt = db()->prepare('SELECT rune_id FROM guide_runes WHERE guide_id = ? ORDER BY position');
+$stmt->execute([$guide_id]);
+$rune_ids = array_map('intval', array_column($stmt->fetchAll(), 'rune_id'));
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     csrf_check();
@@ -26,112 +49,114 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $title = post_str('title');
     $strategy_text = post_str('strategy_text');
     $patch = post_str('patch');
-    $champion_id = get_int('champion_id');
-    $role_id = get_int('role_id');
-    $item_ids = array_filter(post_arr('items'), 'is_numeric');
-    $rune_ids = array_filter(post_arr('runes'), 'is_numeric');
-    if (empty($title)) {
-        $errors[] = 'Titolo obbligatorio.';
+    $champion_id = (int) post_str('champion_id');
+    $role_id = (int) post_str('role_id');
+    $item_ids = array_values(array_unique(array_map('intval', array_filter(post_arr('items'), 'is_numeric'))));
+    $rune_ids = array_values(array_unique(array_map('intval', array_filter(post_arr('runes'), 'is_numeric'))));
+
+    $validChampions = array_map('intval', array_column($champions, 'id'));
+    $validRoles = array_map('intval', array_column($roles, 'id'));
+    $validItems = array_map('intval', array_column($items, 'id'));
+    $validRunes = array_map('intval', array_column($runes, 'id'));
+
+    if (strlen($title) < 5 || strlen($title) > 120) {
+        $errors[] = 'Il titolo deve avere tra 5 e 120 caratteri.';
     }
-    if (empty($strategy_text)) {
-        $errors[] = 'Testo della strategia obbligatorio.';
+    if (strlen($strategy_text) < 20) {
+        $errors[] = 'La strategia deve avere almeno 20 caratteri.';
     }
-    if (empty($patch)) {
-        $errors[] = 'Patch obbligatoria.';
+    if ($patch === '' || strlen($patch) > 10) {
+        $errors[] = 'La patch è obbligatoria (massimo 10 caratteri, es. 14.10).';
     }
-    if ($champion_id <= 0) {
-        $errors[] = 'Seleziona un campione valido.';
+    if (!in_array($champion_id, $validChampions, true)) {
+        $errors[] = 'Seleziona un campione dall\'elenco.';
     }
-    if ($role_id <= 0) {
-        $errors[] = 'Seleziona un ruolo valido.';
+    if (!in_array($role_id, $validRoles, true)) {
+        $errors[] = 'Seleziona un ruolo dall\'elenco.';
+    }
+    if (count(array_diff($item_ids, $validItems)) > 0) {
+        $errors[] = 'Uno degli oggetti scelti non è valido.';
+    }
+    if (count(array_diff($rune_ids, $validRunes)) > 0) {
+        $errors[] = 'Una delle rune scelte non è valida.';
     }
 
     if (empty($errors)) {
+        $pdo = db();
         try {
-            db()->beginTransaction();
+            $pdo->beginTransaction();
 
-            $updateStmt = db()->prepare('UPDATE guides SET title = ?, strategy_text = ?, patch = ?, champion_id = ?, role_id = ?, updated_at = NOW() WHERE id = ?');
-            $updateStmt->execute([$title, $strategy_text, $patch, $champion_id, $role_id, $guide_id]);
+            $stmt = $pdo->prepare('UPDATE guides SET title = ?, strategy_text = ?, patch = ?, champion_id = ?, role_id = ?, updated_at = NOW() WHERE id = ?');
+            $stmt->execute([$title, $strategy_text, $patch, $champion_id, $role_id, $guide_id]);
 
-            $deleteItemsStmt = db()->prepare('DELETE FROM guide_items WHERE guide_id = ?');
-            $deleteItemsStmt->execute([$guide_id]);
-
-            $insertItemsStmt = db()->prepare('INSERT INTO guide_items (guide_id, item_id) VALUES (?, ?)');
-            foreach ($item_ids as $item_id) {
-                $insertItemsStmt->execute([$guide_id, $item_id]);
+            $stmt = $pdo->prepare('DELETE FROM guide_items WHERE guide_id = ?');
+            $stmt->execute([$guide_id]);
+            $stmt = $pdo->prepare('INSERT INTO guide_items (guide_id, item_id, position) VALUES (?, ?, ?)');
+            foreach ($item_ids as $pos => $item_id) {
+                $stmt->execute([$guide_id, $item_id, $pos + 1]);
             }
 
-            $deleteRunesStmt = db()->prepare('DELETE FROM guide_runes WHERE guide_id = ?');
-            $deleteRunesStmt->execute([$guide_id]);
-
-            $insertRunesStmt = db()->prepare('INSERT INTO guide_runes (guide_id, rune_id) VALUES (?, ?)');
-            foreach ($rune_ids as $rune_id) {
-                $insertRunesStmt->execute([$guide_id, $rune_id]);
+            $stmt = $pdo->prepare('DELETE FROM guide_runes WHERE guide_id = ?');
+            $stmt->execute([$guide_id]);
+            $stmt = $pdo->prepare('INSERT INTO guide_runes (guide_id, rune_id, position) VALUES (?, ?, ?)');
+            foreach ($rune_ids as $pos => $rune_id) {
+                $stmt->execute([$guide_id, $rune_id, $pos + 1]);
             }
 
-            db()->commit();
+            $pdo->commit();
+        } catch (Exception $ex) {
+            if ($pdo->inTransaction()) {
+                $pdo->rollBack();
+            }
+            error_log($ex->getMessage());
+            $errors[] = 'Errore durante l\'aggiornamento della guida. Riprova più tardi.';
+        }
 
+        if (empty($errors)) {
             flash_set('Guida aggiornata con successo.');
-            redirect('guide.php?id=' . $guide_id);
-        } catch (Exception $e) {
-            db()->rollBack();
-            error_log($e->getMessage());
-            $errors[] = "Errore durante l'aggiornamento della guida.";
+            redirect('guide_detail.php?id=' . $guide_id);
         }
     }
 }
 
-$championStmt = db()->query('SELECT id, name FROM champions');
-$champions = $championStmt->fetchAll(PDO::FETCH_ASSOC);
 $champion_options = '<option value="">Seleziona un campione</option>';
 foreach ($champions as $champion) {
-    $selected = ($champion['id'] === (int) $guide['champion_id']) ? ' selected="selected"' : '';
-    $champion_options .= '<option value="' . e($champion['id']) . '"' . $selected . '>' . e($champion['name']) . '</option>';
+    $sel = ((int) $champion['id'] === $champion_id) ? ' selected="selected"' : '';
+    $champion_options .= '<option value="' . e($champion['id']) . '"' . $sel . '>' . e($champion['name']) . '</option>';
 }
 
-$roleStmt = db()->query('SELECT id, name FROM roles');
-$roles = $roleStmt->fetchAll(PDO::FETCH_ASSOC);
 $role_options = '<option value="">Seleziona un ruolo</option>';
 foreach ($roles as $role) {
-    $selected = ($role['id'] === (int) $guide['role_id']) ? ' selected="selected"' : '';
-    $role_options .= '<option value="' . e($role['id']) . '"' . $selected . '>' . e($role['name']) . '</option>';
+    $sel = ((int) $role['id'] === $role_id) ? ' selected="selected"' : '';
+    $role_options .= '<option value="' . e($role['id']) . '"' . $sel . '>' . e($role['name']) . '</option>';
 }
-
-$itemStmt = db()->query('SELECT id, name FROM items');
-$items = $itemStmt->fetchAll(PDO::FETCH_ASSOC);
-
-$stmtItems = db()->prepare('SELECT item_id FROM guide_items WHERE guide_id = ?');
-$stmtItems->execute([$guide_id]);
-$selected_items = array_column($stmtItems->fetchAll(PDO::FETCH_ASSOC), 'item_id');
 
 $item_checkboxes = '';
 foreach ($items as $item) {
-    $checked = in_array((int) $item['id'], $selected_items) ? ' checked="checked"' : '';
-    $item_checkboxes .= '<input type="checkbox" name="items[]" value="' . e($item['id']) . '"' . $checked . '> ' . e($item['name']) . '';
+    $chk = in_array((int) $item['id'], $item_ids, true) ? ' checked="checked"' : '';
+    $item_checkboxes .= '<p><input id="item_' . e($item['id']) . '" type="checkbox" name="items[]" value="' . e($item['id']) . '"' . $chk . ' /> '
+        . '<label class="inline-label" for="item_' . e($item['id']) . '">' . e($item['name']) . '</label></p>';
 }
-
-$runeStmt = db()->query('SELECT id, name FROM runes');
-$runes = $runeStmt->fetchAll(PDO::FETCH_ASSOC);
-
-$stmtRunes = db()->prepare('SELECT rune_id FROM guide_runes WHERE guide_id = ?');
-$stmtRunes->execute([$guide_id]);
-$selected_runes = array_column($stmtRunes->fetchAll(PDO::FETCH_ASSOC), 'rune_id');
 
 $rune_checkboxes = '';
 foreach ($runes as $rune) {
-    $checked = in_array((int) $rune['id'], $selected_runes) ? ' checked="checked"' : '';
-    $rune_checkboxes .= '<input type="checkbox" name="runes[]" value="' . e($rune['id']) . '"' . $checked . '> ' . e($rune['name']) . '';
+    $chk = in_array((int) $rune['id'], $rune_ids, true) ? ' checked="checked"' : '';
+    $rune_checkboxes .= '<p><input id="rune_' . e($rune['id']) . '" type="checkbox" name="runes[]" value="' . e($rune['id']) . '"' . $chk . ' /> '
+        . '<label class="inline-label" for="rune_' . e($rune['id']) . '">' . e($rune['name']) . '</label></p>';
 }
 
 render_page('templates/edit_guide.html', [
-    'title' => 'Modifica guida - Rift Academy',
+    'title'       => 'Modifica guida - Rift Academy',
     'description' => 'Modifica una tua guida.',
 ], [
-    'csrf' => $csrf,
-    'errors' => errors_html($errors),
-    'guide_id' => e($guide_id),
+    'csrf'             => csrf_field(),
+    'errors'           => errors_html($errors),
+    'guide_id'         => e($guide_id),
+    'title_value'      => e($title),
+    'patch_value'      => e($patch),
+    'strategy_value'   => e($strategy_text),
     'champion_options' => $champion_options,
-    'role_options' => $role_options,
-    'item_checkboxes' => $item_checkboxes,
-    'rune_checkboxes' => $rune_checkboxes,
+    'role_options'     => $role_options,
+    'item_checkboxes'  => $item_checkboxes,
+    'rune_checkboxes'  => $rune_checkboxes,
 ]);

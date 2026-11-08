@@ -5,117 +5,135 @@ require_once 'includes/db.php';
 
 require_login();
 
-$champion_options = '';
-$role_options = '';
-$item_checkboxes = '';
-$rune_checkboxes = '';
 $errors = [];
-$csrf_token = csrf_field();
-$csrf_check = true;
 
-try {
-    // Caricare campioni, ruoli, oggetti e rune per i campi di selezione
-    $stmt = db()->query('SELECT id, name FROM champions ORDER BY name');
-    while ($champion = $stmt->fetch()) {
-        $champion_options .= "<option value=\"{$champion['id']}\">{$champion['name']}</option>";
+// Dati per i campi di selezione (letti sempre, servono anche per validare)
+$champions = db()->query('SELECT id, name FROM champions ORDER BY name')->fetchAll();
+$roles = db()->query('SELECT id, name FROM roles ORDER BY id')->fetchAll();
+$items = db()->query('SELECT id, name FROM items ORDER BY name')->fetchAll();
+$runes = db()->query('SELECT id, name FROM runes ORDER BY name')->fetchAll();
+
+// Valori del form (vuoti alla prima visita, ripopolati dopo un errore)
+$title = '';
+$strategy_text = '';
+$patch = '';
+$champion_id = 0;
+$role_id = 0;
+$item_ids = [];
+$rune_ids = [];
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    csrf_check();
+
+    $title = post_str('title');
+    $strategy_text = post_str('strategy_text');
+    $patch = post_str('patch');
+    $champion_id = (int) post_str('champion_id');
+    $role_id = (int) post_str('role_id');
+    $item_ids = array_values(array_unique(array_map('intval', array_filter(post_arr('items'), 'is_numeric'))));
+    $rune_ids = array_values(array_unique(array_map('intval', array_filter(post_arr('runes'), 'is_numeric'))));
+
+    // Elenchi degli id esistenti per controllare i valori ricevuti
+    $validChampions = array_map('intval', array_column($champions, 'id'));
+    $validRoles = array_map('intval', array_column($roles, 'id'));
+    $validItems = array_map('intval', array_column($items, 'id'));
+    $validRunes = array_map('intval', array_column($runes, 'id'));
+
+    if (strlen($title) < 5 || strlen($title) > 120) {
+        $errors[] = 'Il titolo deve avere tra 5 e 120 caratteri.';
+    }
+    if (strlen($strategy_text) < 20) {
+        $errors[] = 'La strategia deve avere almeno 20 caratteri.';
+    }
+    if ($patch === '' || strlen($patch) > 10) {
+        $errors[] = 'La patch è obbligatoria (massimo 10 caratteri, es. 14.10).';
+    }
+    if (!in_array($champion_id, $validChampions, true)) {
+        $errors[] = 'Seleziona un campione dall\'elenco.';
+    }
+    if (!in_array($role_id, $validRoles, true)) {
+        $errors[] = 'Seleziona un ruolo dall\'elenco.';
+    }
+    if (count(array_diff($item_ids, $validItems)) > 0) {
+        $errors[] = 'Uno degli oggetti scelti non è valido.';
+    }
+    if (count(array_diff($rune_ids, $validRunes)) > 0) {
+        $errors[] = 'Una delle rune scelte non è valida.';
     }
 
-    $stmt = db()->query('SELECT id, name FROM roles ORDER BY name');
-    while ($role = $stmt->fetch()) {
-        $role_options .= "<option value=\"{$role['id']}\">{$role['name']}</option>";
-    }
+    if (empty($errors)) {
+        $pdo = db();
+        try {
+            $pdo->beginTransaction();
 
-    $stmt = db()->query('SELECT id, name FROM items ORDER BY name');
-    while ($item = $stmt->fetch()) {
-        $item_checkboxes .= "<input type=\"checkbox\" name=\"items[]\" value=\"{$item['id']}\"> {$item['name']}<br>";
-    }
+            $stmt = $pdo->prepare('INSERT INTO guides (user_id, champion_id, role_id, title, strategy_text, patch) VALUES (?, ?, ?, ?, ?, ?)');
+            $stmt->execute([current_user()['id'], $champion_id, $role_id, $title, $strategy_text, $patch]);
+            $guide_id = (int) $pdo->lastInsertId();
 
-    $stmt = db()->query('SELECT id, name FROM runes ORDER BY name');
-    while ($rune = $stmt->fetch()) {
-        $rune_checkboxes .= "<input type=\"checkbox\" name=\"runes[]\" value=\"{$rune['id']}\"> {$rune['name']}<br>";
-    }
+            $stmt = $pdo->prepare('INSERT INTO guide_items (guide_id, item_id, position) VALUES (?, ?, ?)');
+            foreach ($item_ids as $pos => $item_id) {
+                $stmt->execute([$guide_id, $item_id, $pos + 1]);
+            }
 
-    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-        echo '<pre>';
-        print_r($_POST);
-        echo '</pre>';
-        csrf_check();
+            $stmt = $pdo->prepare('INSERT INTO guide_runes (guide_id, rune_id, position) VALUES (?, ?, ?)');
+            foreach ($rune_ids as $pos => $rune_id) {
+                $stmt->execute([$guide_id, $rune_id, $pos + 1]);
+            }
 
-        $title = post_str('title');
-        $strategy_text = post_str('strategy_text');
-        $patch = post_str('patch');
-        $champion_id = get_int('champion_id');
-        $role_id = get_int('role_id');
-        $items = isset($_POST['items']) ? $_POST['items'] : [];
-        $runes = isset($_POST['runes']) ? $_POST['runes'] : [];
-
-        // Validazione dei campi
-        if (empty($title)) {
-            $errors[] = 'Il titolo è obbligatorio.';
-        }
-        if (empty($strategy_text)) {
-            $errors[] = 'La strategia è obbligatoria.';
-        }
-        if (empty($patch)) {
-            $errors[] = 'La patch è obbligatoria.';
-        }
-        if ($champion_id == 0) {
-            $errors[] = 'Devi selezionare un campione.';
-        }
-        if ($role_id == 0) {
-            $errors[] = 'Devi selezionare un ruolo.';
+            $pdo->commit();
+        } catch (Exception $ex) {
+            if ($pdo->inTransaction()) {
+                $pdo->rollBack();
+            }
+            error_log($ex->getMessage());
+            $errors[] = 'Errore durante la creazione della guida. Riprova più tardi.';
         }
 
         if (empty($errors)) {
-            $pdo = db();
-            $pdo->beginTransaction();
-
-            try {
-                $stmt = $pdo->prepare('INSERT INTO guides (user_id, champion_id, role_id, title, strategy_text, patch, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, NOW(), NOW())');
-                $stmt->execute([current_user()['id'], $champion_id, $role_id, $title, $strategy_text, $patch]);
-
-                $guide_id = $pdo->lastInsertId();
-
-                // Inserimento degli oggetti
-                if (!empty($items)) {
-                    $stmt = $pdo->prepare('INSERT INTO guide_items (guide_id, item_id) VALUES (?, ?)');
-                    foreach ($items as $item_id) {
-                        $stmt->execute([$guide_id, $item_id]);
-                    }
-                }
-
-                // Inserimento delle rune
-                if (!empty($runes)) {
-                    $stmt = $pdo->prepare('INSERT INTO guide_runes (guide_id, rune_id) VALUES (?, ?)');
-                    foreach ($runes as $rune_id) {
-                        $stmt->execute([$guide_id, $rune_id]);
-                    }
-                }
-
-                $pdo->commit();
-
-                flash_set('Guida creata con successo.');
-                redirect("guide_detail.php?id=$guide_id");
-            } catch (Exception $e) {
-                $pdo->rollBack();
-                error_log($e->getMessage());
-                $errors[] = 'Errore durante la creazione della guida. Riprova più tardi.';
-            }
+            flash_set('Guida creata con successo.');
+            redirect('guide_detail.php?id=' . $guide_id);
         }
     }
-} catch (Exception $e) {
-    error_log($e->getMessage());
-    $errors[] = 'Errore nel caricamento dei dati. Riprova più tardi.';
+}
+
+// HTML dei campi di selezione, con i valori correnti
+$champion_options = '<option value="">Seleziona un campione</option>';
+foreach ($champions as $champion) {
+    $sel = ((int) $champion['id'] === $champion_id) ? ' selected="selected"' : '';
+    $champion_options .= '<option value="' . e($champion['id']) . '"' . $sel . '>' . e($champion['name']) . '</option>';
+}
+
+$role_options = '<option value="">Seleziona un ruolo</option>';
+foreach ($roles as $role) {
+    $sel = ((int) $role['id'] === $role_id) ? ' selected="selected"' : '';
+    $role_options .= '<option value="' . e($role['id']) . '"' . $sel . '>' . e($role['name']) . '</option>';
+}
+
+$item_checkboxes = '';
+foreach ($items as $item) {
+    $chk = in_array((int) $item['id'], $item_ids, true) ? ' checked="checked"' : '';
+    $item_checkboxes .= '<p><input id="item_' . e($item['id']) . '" type="checkbox" name="items[]" value="' . e($item['id']) . '"' . $chk . ' /> '
+        . '<label class="inline-label" for="item_' . e($item['id']) . '">' . e($item['name']) . '</label></p>';
+}
+
+$rune_checkboxes = '';
+foreach ($runes as $rune) {
+    $chk = in_array((int) $rune['id'], $rune_ids, true) ? ' checked="checked"' : '';
+    $rune_checkboxes .= '<p><input id="rune_' . e($rune['id']) . '" type="checkbox" name="runes[]" value="' . e($rune['id']) . '"' . $chk . ' /> '
+        . '<label class="inline-label" for="rune_' . e($rune['id']) . '">' . e($rune['name']) . '</label></p>';
 }
 
 render_page('templates/create_guide.html', [
     'title'       => 'Nuova guida - Rift Academy',
     'description' => 'Pubblica una nuova guida o build.',
 ], [
-    'csrf' => $csrf_token,
-    'errors' => errors_html($errors),
+    'csrf'             => csrf_field(),
+    'errors'           => errors_html($errors),
+    'title_value'      => e($title),
+    'patch_value'      => e($patch),
+    'strategy_value'   => e($strategy_text),
     'champion_options' => $champion_options,
-    'role_options' => $role_options,
-    'item_checkboxes' => $item_checkboxes,
-    'rune_checkboxes' => $rune_checkboxes,
+    'role_options'     => $role_options,
+    'item_checkboxes'  => $item_checkboxes,
+    'rune_checkboxes'  => $rune_checkboxes,
 ]);

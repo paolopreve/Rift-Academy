@@ -13,24 +13,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $username = post_str('username');
     $password = isset($_POST['password']) && is_string($_POST['password']) ? $_POST['password'] : '';
 
-    // Validazione lato server dei camp
-    if (empty($username) || empty($password)) {
-        $errors[] = 'Compilare tutti i campi.';
+    // Validazione lato server dei campi
+    if ($username === '' || $password === '') {
+        $errors[] = 'Compila nome utente e password.';
     }
 
     if (empty($errors)) {
-        // SELECT dell'utente per username con prepared statement
-        $stmt = db()->prepare('SELECT id, username, password_hash, status FROM users WHERE username = ?');
+        // Cerca l'utente per username (serve anche il ruolo per la sessione)
+        $stmt = db()->prepare('SELECT id, username, password_hash, role, status FROM users WHERE username = ?');
         $stmt->execute([$username]);
         $row = $stmt->fetch();
 
-        // Verifica password e stato utente
+        // Messaggio unico per credenziali errate o utente sospeso
         if ($row && password_verify($password, $row['password_hash']) && $row['status'] === 'active') {
             login_user($row);
             flash_set('Accesso eseguito.');
             redirect('profile.php');
         } else {
-            $errors[] = 'Credenziali non valide.';
+            $errors[] = 'Nome utente o password non validi, oppure account non attivo.';
         }
     }
 }

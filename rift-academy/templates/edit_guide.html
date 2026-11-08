@@ -1,11 +1,10 @@
 <h1>Modifica guida</h1>
 {{errors}}
-<form action="edit_guide.php" method="post" data-validate="data-validate">
+<form action="edit_guide.php?id={{guide_id}}" method="post" data-validate="data-validate">
   {{csrf}}
-  <input type="hidden" name="id" value="{{guide_id}}" />
   <p>
-    <label for="title">Titolo (obbligatorio)</label>
-    <input id="title" name="title" type="text" required="required" data-minlength="5" />
+    <label for="title">Titolo (obbligatorio, da 5 a 120 caratteri)</label>
+    <input id="title" name="title" type="text" required="required" data-minlength="5" maxlength="120" value="{{title_value}}" />
   </p>
   <p>
     <label for="champion_id">Campione (obbligatorio)</label>
@@ -21,7 +20,7 @@
   </p>
   <p>
     <label for="patch">Patch di riferimento (obbligatoria, es. 14.10)</label>
-    <input id="patch" name="patch" type="text" required="required" />
+    <input id="patch" name="patch" type="text" required="required" maxlength="10" value="{{patch_value}}" />
   </p>
   <fieldset>
     <legend>Oggetti</legend>
@@ -32,8 +31,8 @@
     {{rune_checkboxes}}
   </fieldset>
   <p>
-    <label for="strategy_text">Strategia (obbligatoria, testo libero)</label>
-    <textarea id="strategy_text" name="strategy_text" rows="10" cols="60" required="required" data-minlength="20"></textarea>
+    <label for="strategy_text">Strategia (obbligatoria, testo libero, almeno 20 caratteri)</label>
+    <textarea id="strategy_text" name="strategy_text" rows="10" cols="60" required="required" data-minlength="20">{{strategy_value}}</textarea>
   </p>
   <p><button type="submit">Salva modifiche</button></p>
 </form>

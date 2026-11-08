@@ -3,61 +3,62 @@
 require_once 'includes/auth.php';
 require_once 'includes/db.php';
 
-// Leggere il filtro dal parametro GET 'role' (validare contro la tabella roles)
+// Filtro letto da GET e validato contro la tabella roles
 $selectedRole = get_int('role');
 
-// Preparare la query per ottenere i ruoli disponibili
-$stmt = db()->prepare('SELECT id, name FROM roles');
-$stmt->execute();
-$roles = $stmt->fetchAll();
+$roles = db()->query('SELECT id, name FROM roles ORDER BY id')->fetchAll();
 
-// Validare il ruolo selezionato
-$roleOptionsHtml = '';
-$roleInRoles = false;
+$roleOptionsHtml = '<option value="0">Tutti i ruoli</option>';
+$roleValid = false;
 foreach ($roles as $role) {
-    $roleOptionsHtml .= '<option value="' . e($role['id']) . '"' . ($selectedRole === $role['id'] ? ' selected' : '') . '>' . e($role['name']) . '</option>';
-    if ($selectedRole === $role['id']) {
-        $roleInRoles = true;
+    $isSelected = ((int) $role['id'] === $selectedRole);
+    if ($isSelected) {
+        $roleValid = true;
     }
+    $roleOptionsHtml .= '<option value="' . e($role['id']) . '"' . ($isSelected ? ' selected="selected"' : '') . '>' . e($role['name']) . '</option>';
+}
+if (!$roleValid) {
+    $selectedRole = 0;
 }
 
-// Se il ruolo non è valido, resettarlo a null
-if (!$roleInRoles) {
-    $selectedRole = null;
-}
-
-// Preparare la query per ottenere i campioni filtrati per ruolo
-$query = 'SELECT c.id, c.name AS champion_name, r.name AS role_name
+// Un campione può avere più ruoli: GROUP_CONCAT evita righe duplicate
+$query = 'SELECT c.id, c.name, c.title, c.image_path,
+                 GROUP_CONCAT(r.name ORDER BY r.id SEPARATOR \', \') AS role_names
           FROM champions c
-          JOIN champion_roles cr ON c.id = cr.champion_id
-          JOIN roles r ON cr.role_id = r.id';
-if ($selectedRole !== null) {
-    $query .= ' WHERE cr.role_id = ?';
+          LEFT JOIN champion_roles cr ON cr.champion_id = c.id
+          LEFT JOIN roles r ON r.id = cr.role_id';
+$params = [];
+if ($selectedRole > 0) {
+    $query .= ' WHERE c.id IN (SELECT champion_id FROM champion_roles WHERE role_id = ?)';
+    $params[] = $selectedRole;
 }
-$query .= ' ORDER BY c.name';
+$query .= ' GROUP BY c.id, c.name, c.title, c.image_path ORDER BY c.name';
 
 $stmt = db()->prepare($query);
-if ($selectedRole !== null) {
-    $stmt->execute([$selectedRole]);
-} else {
-    $stmt->execute();
-}
+$stmt->execute($params);
 $champions = $stmt->fetchAll();
 
-// Costruire l'HTML della lista dei campioni
 $championsListHtml = '';
 foreach ($champions as $champion) {
-    $championsListHtml .= '<div class="champion-card">';
-    $championsListHtml .= '<h2>' . e($champion['champion_name']) . '</h2>';
-    $championsListHtml .= '<p><strong>Ruolo:</strong> ' . e($champion['role_name']) . '</p>';
-    $championsListHtml .= '<a href="champion.php?id=' . e($champion['id']) . '">Dettagli del campione</a>';
-    $championsListHtml .= '</div>';
+    $championsListHtml .= '<article class="champion-card">';
+    $championsListHtml .= '<img src="' . e($champion['image_path']) . '" alt="' . e($champion['name']) . '" width="96" height="96" />';
+    $championsListHtml .= '<h3>' . e($champion['name']) . '</h3>';
+    if ($champion['title'] !== null && $champion['title'] !== '') {
+        $championsListHtml .= '<p>' . e($champion['title']) . '</p>';
+    }
+    $championsListHtml .= '<p><strong>Ruoli:</strong> ' . e($champion['role_names'] !== null ? $champion['role_names'] : 'non assegnati') . '</p>';
+    $championsListHtml .= '</article>';
+}
+if ($championsListHtml === '') {
+    $championsListHtml = '<p>Nessun campione trovato per il ruolo scelto.</p>';
+} else {
+    $championsListHtml = '<div class="card-grid">' . $championsListHtml . '</div>';
 }
 
 render_page('templates/champions.html', [
     'title'       => 'Campioni - Rift Academy',
     'description' => 'Catalogo dei campioni di League of Legends filtrabile per ruolo.',
 ], [
-    'role_options' => $roleOptionsHtml,
+    'role_options'   => $roleOptionsHtml,
     'champions_list' => $championsListHtml,
 ]);

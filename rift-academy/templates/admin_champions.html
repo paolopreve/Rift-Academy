@@ -2,13 +2,14 @@
 {{errors}}
 <form action="admin_champions.php" method="post" data-validate="data-validate">
   {{csrf}}
+  {{champion_id_field}}
   <p>
     <label for="name">Nome del campione (obbligatorio)</label>
-    <input id="name" name="name" type="text" required="required" />
+    <input id="name" name="name" type="text" required="required" maxlength="50" value="{{name_value}}" />
   </p>
   <p>
     <label for="image_path">Percorso immagine (obbligatorio, es. img/champions/Ahri.png)</label>
-    <input id="image_path" name="image_path" type="text" required="required" />
+    <input id="image_path" name="image_path" type="text" required="required" maxlength="255" value="{{image_value}}" />
   </p>
   <fieldset>
     <legend>Ruoli</legend>
