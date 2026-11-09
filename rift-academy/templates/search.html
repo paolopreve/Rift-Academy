@@ -1,3 +1,18 @@
-<h1>Risultati della ricerca</h1>
-<p>Ricerca per: {{query}}</p>
-{{results}}
+<h1>Guide</h1>
+<form class="search-page-form" role="search" action="search.php" method="get">
+  <p>
+    <label for="q">Titolo o campione</label>
+    <input id="q" name="q" type="search" value="{{query}}" />
+  </p>
+  <p>
+    <label for="role">Corsia</label>
+    <select id="role" name="role">
+      {{role_options}}
+    </select>
+  </p>
+  <p><button type="submit">Cerca</button></p>
+</form>
+<section aria-labelledby="risultati">
+  <h2 id="risultati">{{results_title}}</h2>
+  {{results}}
+</section>

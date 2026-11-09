@@ -73,14 +73,37 @@ function nav_user_html(): string
 {
     $u = current_user();
     if ($u === null) {
-        return '<ul class="user-nav"><li><a href="login.php">Accedi</a></li><li><a href="register.php">Registrati</a></li></ul>';
+        return '<ul class="user-nav"><li><a href="login.php">Accedi</a></li><li><a class="btn" href="register.php">Registrati</a></li></ul>';
     }
-    $html = '<ul class="user-nav"><li><a href="create_guide.php">Nuova guida</a></li><li><a href="profile.php">Profilo</a></li>';
+    $html = '<ul class="user-nav"><li><a href="profile.php">Profilo</a></li>';
     if ($u['role'] === 'admin') {
         $html .= '<li><a href="admin_dashboard.php">Amministrazione</a></li>';
     }
+    $html .= '<li><a class="btn" href="create_guide.php">Nuova guida</a></li>';
     $html .= '<li><form action="logout.php" method="post">' . csrf_field() . '<button type="submit">Esci</button></form></li></ul>';
     return $html;
+}
+
+// Versione leggera di un'immagine (es. images/champions/ahri.jpg -> ahri-small.webp).
+// Se la versione ridotta non esiste si usa l'originale.
+function img_small(string $path): string
+{
+    $small = preg_replace('/\.(jpe?g|png)$/i', '-small.webp', $path);
+    if ($small !== null && $small !== $path && is_file(__DIR__ . '/../' . $small)) {
+        return $small;
+    }
+    return $path;
+}
+
+// Data in formato breve italiano, es. "9 nov 2026" (da una data MySQL).
+function data_breve(string $mysqlDate): string
+{
+    $mesi = ['gen', 'feb', 'mar', 'apr', 'mag', 'giu', 'lug', 'ago', 'set', 'ott', 'nov', 'dic'];
+    $ts = strtotime($mysqlDate);
+    if ($ts === false) {
+        return $mysqlDate;
+    }
+    return date('j', $ts) . ' ' . $mesi[(int) date('n', $ts) - 1] . ' ' . date('Y', $ts);
 }
 
 // Compone header + pagina + footer.
@@ -95,10 +118,15 @@ function render_page(string $template, array $meta, array $vars = []): void
 
     $header = strtr($header, [
         '{{title}}'       => e($meta['title'] ?? 'Rift Academy'),
-        '{{description}}' => e($meta['description'] ?? ''),
+        '{{description}}' => e(!empty($meta['description']) ? $meta['description'] : 'Rift Academy: guide, build e rune per League of Legends scritte dalla community.'),
+        '{{keywords}}'    => e(!empty($meta['keywords']) ? $meta['keywords'] : 'League of Legends, guide, build, rune, campioni, Top, Jungle, Mid, Bot, Support'),
         '{{nav_user}}'    => nav_user_html(),
         '{{flash}}'       => flash_html(),
     ]);
+
+    // Segna la voce di menu della pagina corrente (aria-current, letto dagli screen reader)
+    $current = basename($_SERVER['SCRIPT_NAME']);
+    $header = str_replace('<li><a href="' . $current . '">', '<li><a href="' . $current . '" aria-current="page">', $header);
 
     $repl = [];
     foreach ($vars as $key => $html) {

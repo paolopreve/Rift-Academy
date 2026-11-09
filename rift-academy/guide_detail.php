@@ -126,11 +126,13 @@ if ($user !== null) {
         . '<input type="hidden" name="guide_id" value="' . $gid . '" />'
         . '<button type="submit">' . ($isFavorite ? 'Rimuovi dai preferiti' : 'Aggiungi ai preferiti') . '</button></form>';
 
-    $actionsHtml .= '<form action="report_content.php" method="post">' . csrf_field()
+    // Il modulo di segnalazione resta chiuso in un <details> nativo (accessibile da tastiera)
+    $actionsHtml .= '<details class="report"><summary>Segnala questa guida</summary>'
+        . '<form action="report_content.php" method="post">' . csrf_field()
         . '<input type="hidden" name="guide_id" value="' . $gid . '" />'
         . '<p><label for="report-guide-reason">Motivo della segnalazione della guida (obbligatorio)</label>'
         . '<input id="report-guide-reason" name="reason" type="text" required="required" maxlength="255" /></p>'
-        . '<p><button type="submit">Segnala guida</button></p></form>';
+        . '<p><button type="submit">Segnala guida</button></p></form></details>';
 
     if (is_owner_or_admin((int) $guide['user_id'])) {
         $actionsHtml .= '<p><a href="edit_guide.php?id=' . $gid . '">Modifica guida</a></p>';
@@ -138,6 +140,11 @@ if ($user !== null) {
             . '<input type="hidden" name="guide_id" value="' . $gid . '" />'
             . '<button type="submit">Elimina guida</button></form>';
     }
+}
+
+// Senza login il riquadro Azioni spiega cosa si può fare dopo l'accesso
+if ($actionsHtml === '') {
+    $actionsHtml = '<p><a href="login.php">Accedi</a> per salvare la guida tra i preferiti o segnalarla.</p>';
 }
 
 // Elenco commenti
@@ -156,11 +163,12 @@ if (empty($comments)) {
                     . '<input type="hidden" name="comment_id" value="' . $cid . '" />'
                     . '<button type="submit">Elimina commento di ' . e($comment['username']) . '</button></form>';
             }
-            $commentsHtml .= '<form action="report_content.php" method="post">' . csrf_field()
+            $commentsHtml .= '<details class="report"><summary>Segnala il commento di ' . e($comment['username']) . '</summary>'
+                . '<form action="report_content.php" method="post">' . csrf_field()
                 . '<input type="hidden" name="comment_id" value="' . $cid . '" />'
                 . '<p><label for="report-comment-' . $cid . '">Motivo della segnalazione del commento di ' . e($comment['username']) . '</label>'
                 . '<input id="report-comment-' . $cid . '" name="reason" type="text" required="required" maxlength="255" /></p>'
-                . '<p><button type="submit">Segnala commento</button></p></form>';
+                . '<p><button type="submit">Segnala commento</button></p></form></details>';
         }
         $commentsHtml .= '</li>';
     }
@@ -181,7 +189,8 @@ if ($user !== null) {
 
 render_page('templates/guide_detail.html', [
     'title'       => $guide['title'] . ' - Rift Academy',
-    'description' => 'Guida di ' . $guide['champion_name'] . ' (' . $guide['role_name'] . ') per League of Legends.',
+    'description' => 'Guida di ' . $guide['champion_name'] . ' (' . $guide['role_name'] . ') per League of Legends: build, rune e strategia.',
+    'keywords'    => 'League of Legends, ' . $guide['champion_name'] . ', ' . $guide['role_name'] . ', guida, build, rune, patch ' . $guide['patch'],
 ], [
     'breadcrumb'     => $breadcrumbHtml,
     'guide_title'    => e($guide['title']),

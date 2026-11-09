@@ -41,7 +41,7 @@ $champions = $stmt->fetchAll();
 $championsListHtml = '';
 foreach ($champions as $champion) {
     $championsListHtml .= '<article class="champion-card">';
-    $championsListHtml .= '<img src="' . e($champion['image_path']) . '" alt="' . e($champion['name']) . '" width="96" height="96" />';
+    $championsListHtml .= '<img src="' . e(img_small($champion['image_path'])) . '" alt="' . e($champion['name']) . '" width="480" height="283" loading="lazy" decoding="async" />';
     $championsListHtml .= '<h3>' . e($champion['name']) . '</h3>';
     if ($champion['title'] !== null && $champion['title'] !== '') {
         $championsListHtml .= '<p>' . e($champion['title']) . '</p>';
@@ -58,6 +58,7 @@ if ($championsListHtml === '') {
 render_page('templates/champions.html', [
     'title'       => 'Campioni - Rift Academy',
     'description' => 'Catalogo dei campioni di League of Legends filtrabile per ruolo.',
+    'keywords'    => 'League of Legends, campioni, ruoli, Top, Jungle, Mid, Bot, Support',
 ], [
     'role_options'   => $roleOptionsHtml,
     'champions_list' => $championsListHtml,

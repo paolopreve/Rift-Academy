@@ -1,49 +1,126 @@
-/* Rift Academy - stile base. CSS puro, senza framework.
-   Contrasti verificati per testo normale (>= 4.5:1) e componenti (>= 3:1). */
-:root {
-  --bg: #ffffff;
-  --text: #1f2937;
-  --muted: #4b5563;
-  --link: #1d4ed8;
-  --brand: #111827;
-  --on-brand: #ffffff;
-  --error: #b91c1c;
-  --border: #d1d5db;
-  --focus: #005fcc;
+/* ==========================================================================
+   Rift Academy - foglio di stile principale
+   Tema scuro con accento oro. CSS puro, mobile first: le regole base valgono
+   per lo smartphone, le media query (min-width) aggiungono colonne.
+   Layout con CSS Grid, unità relative (rem/em), colori in variabili :root.
+   Contrasti verificati: testo >= 4.5:1, bordi dei campi e focus >= 3:1.
+   ========================================================================== */
+
+/* --- 1. Font locali (licenza SIL OFL, file in fonts/) ----------------------- */
+@font-face {
+  font-family: "Chakra Petch";
+  src: url("../fonts/chakra-petch-latin-600-normal.woff2") format("woff2");
+  font-weight: 600;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Chakra Petch";
+  src: url("../fonts/chakra-petch-latin-700-normal.woff2") format("woff2");
+  font-weight: 700;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Inter";
+  src: url("../fonts/inter-latin-400-normal.woff2") format("woff2");
+  font-weight: 400;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Inter";
+  src: url("../fonts/inter-latin-600-normal.woff2") format("woff2");
+  font-weight: 600;
+  font-display: swap;
 }
 
+/* --- 2. Variabili ------------------------------------------------------------ */
+:root {
+  --sfondo: #0b0f1a;        /* pagina */
+  --sfondo-2: #0e1322;      /* piè di pagina */
+  --pannello: #131a2b;      /* card e riquadri */
+  --pannello-2: #1a2338;    /* elementi dentro le card */
+  --linea: #232c43;         /* bordi decorativi */
+  --linea-forte: #5b6683;   /* bordi dei campi (3:1) */
+  --testo: #eef0f5;         /* 16.8:1 sullo sfondo */
+  --tenue: #a7b0c4;         /* testo secondario (8.8:1) */
+  --oro: #f2b53a;           /* accento (10.4:1) */
+  --su-oro: #171005;        /* testo sopra l'oro (10.3:1) */
+  --visitato: #c9a8ff;
+  --errore: #ff8f85;
+  --successo: #72d69b;
+
+  --titoli: "Chakra Petch", "Trebuchet MS", Verdana, sans-serif;
+  --testo-font: "Inter", "Segoe UI", Verdana, sans-serif;
+
+  --raggio: 0.75rem;
+  --raggio-piccolo: 0.4rem;
+  --larghezza: 80rem;
+  --spazio: 1rem;
+}
+
+/* --- 3. Base ----------------------------------------------------------------- */
 *, *::before, *::after { box-sizing: border-box; }
 
-html { font-size: 100%; }
+html {
+  font-size: 100%;
+  scroll-padding-top: 1rem;     /* il focus non finisce sotto i bordi (2.4.11) */
+}
 
 body {
   margin: 0;
-  background: var(--bg);
-  color: var(--text);
-  font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
-  line-height: 1.55;
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: auto 1fr auto;    /* header, contenuto, footer in fondo */
+  color: var(--testo);
+  font-family: var(--testo-font);
+  font-size: 1rem;
+  line-height: 1.6;
+  /* bagliore dorato + griglia sottile: solo sfondi CSS, nessuna immagine */
+  background-color: var(--sfondo);
+  background-image:
+    radial-gradient(ellipse 40rem 26rem at 38% 8rem, rgba(242, 181, 58, 0.10), transparent 70%),
+    linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
+  background-size: auto, 4rem 4rem, 4rem 4rem;
+  background-repeat: no-repeat, repeat, repeat;
 }
 
-a { color: var(--link); }
+h1, h2, h3 {
+  font-family: var(--titoli);
+  font-weight: 700;
+  line-height: 1.15;
+  margin: 0 0 0.75rem;
+}
+h1 { font-size: 2.1rem; }
+h2 { font-size: 1.4rem; margin-top: 2rem; }
+h3 { font-size: 1.15rem; }
 
+p, li { max-width: 70ch; }
+img { max-width: 100%; height: auto; }
+
+/* link: sottolineati nel testo, colore diverso se visitati */
+a { color: var(--oro); text-underline-offset: 0.18em; }
+a:visited { color: var(--visitato); }
+a:hover { text-decoration-thickness: 0.15em; }
+
+/* --- 4. Focus e accessibilità ------------------------------------------------ */
 :focus-visible {
-  outline: 3px solid var(--focus);
-  outline-offset: 2px;
+  outline: 3px solid var(--oro);
+  outline-offset: 3px;
+  border-radius: 2px;
 }
-
-.site-header :focus-visible,
-.site-footer :focus-visible {
-  outline-color: #ffffff;
-}
+main:focus { outline: none; }      /* main riceve il focus solo dal link "salta" */
 
 .skip-link {
   position: absolute;
   left: 0.5rem;
-  top: -4rem;
-  padding: 0.5rem 1rem;
-  background: var(--brand);
-  color: var(--on-brand);
+  top: -5rem;
   z-index: 10;
+  padding: 0.6rem 1rem;
+  background: var(--oro);
+  color: var(--su-oro);
+  font-weight: 600;
+  border-radius: var(--raggio-piccolo);
 }
 .skip-link:focus { top: 0.5rem; }
 
@@ -56,65 +133,665 @@ a { color: var(--link); }
   white-space: nowrap;
 }
 
+/* --- 5. Pulsanti e link-pulsante ---------------------------------------------- */
+button,
+.btn,
+.btn-outline {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2.75rem;
+  padding: 0.55rem 1.25rem;
+  font: 600 1rem/1.2 var(--testo-font);
+  text-decoration: none;
+  border: 2px solid var(--oro);
+  border-radius: var(--raggio-piccolo);
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+button, .btn, .btn:visited {
+  background: var(--oro);
+  color: var(--su-oro);
+}
+button:hover, .btn:hover { background: #ffd27a; border-color: #ffd27a; }
+
+.btn-outline, .btn-outline:visited {
+  background: transparent;
+  color: var(--oro);
+}
+.btn-outline:hover { background: var(--oro); color: var(--su-oro); }
+
+/* azioni distruttive (elimina, sospendi): stile diverso e testo esplicito.
+   Selettori di attributo sul form, come visto nelle slide. */
+form[action="delete_guide.php"] button,
+form[action="admin_users.php"] button,
+form:has(input[name="action"][value^="delete"]) button {
+  background: transparent;
+  color: var(--errore);
+  border-color: var(--errore);
+}
+form[action="delete_guide.php"] button:hover,
+form[action="admin_users.php"] button:hover,
+form:has(input[name="action"][value^="delete"]) button:hover {
+  background: var(--errore);
+  color: var(--su-oro);
+}
+
+/* etichette piccole (ruolo, campione) */
+.tag {
+  display: inline-block;
+  padding: 0.1rem 0.45rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1.5;
+  border-radius: 0.25rem;
+  background: var(--sfondo);
+  color: var(--testo);
+}
+.tag-role {
+  background: var(--oro);
+  color: var(--su-oro);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* --- 6. Intestazione ----------------------------------------------------------- */
 .site-header {
+  background: rgba(11, 15, 26, 0.92);
+  border-bottom: 1px solid var(--linea);
+}
+.header-inner {
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-template-areas:
+    "brand"
+    "nav"
+    "user";
+  gap: 0.5rem;
+  max-width: var(--larghezza);
+  margin: 0 auto;
+  padding: 0.75rem var(--spazio);
+}
+.brand     { grid-area: brand; }
+.main-nav  { grid-area: nav; }
+.user-nav  { grid-area: user; }
+
+.brand,
+.brand-text {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-family: var(--titoli);
+  font-size: 1.4rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  color: var(--testo);
+  text-decoration: none;
+}
+.brand:visited { color: var(--testo); }
+.brand em, .brand-text em { font-style: normal; color: var(--oro); }
+.brand img { width: 2rem; height: 2rem; }
+
+.site-header ul {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 0.75rem 1.5rem;
-  padding: 0.75rem 1rem;
-  background: var(--brand);
-  color: var(--on-brand);
+  gap: 0.25rem 1.5rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
 }
-.site-header a { color: var(--on-brand); }
-.site-header ul { display: flex; flex-wrap: wrap; gap: 0.5rem 1rem; margin: 0; padding: 0; list-style: none; }
-.brand { font-weight: 700; font-size: 1.25rem; text-decoration: none; }
-
-.site-header a,
-.site-header button {
+.main-nav a,
+.user-nav a:not(.btn) {
   display: inline-block;
-  min-height: 1.5rem;     /* target >= 24px (WCAG 2.5.8) */
-  min-width: 1.5rem;
+  padding: 0.35rem 0;
+  min-height: 1.5rem;              /* target >= 24px (WCAG 2.5.8) */
+  color: #c3cada;
+  font-weight: 600;
+  text-decoration: none;
+  border-bottom: 2px solid transparent;
 }
+.main-nav a:hover,
+.user-nav a:not(.btn):hover { color: var(--testo); border-bottom-color: var(--oro); }
+/* pagina corrente: testo bianco e linea dorata, non solo il colore */
+.main-nav a[aria-current="page"] { color: var(--testo); border-bottom-color: var(--oro); }
 
-main { max-width: 60rem; margin: 0 auto; padding: 1rem; }
-main:focus { outline: none; }
-
-.site-footer {
-  padding: 1rem;
-  background: var(--brand);
-  color: var(--on-brand);
-  font-size: 0.875rem;
+.user-nav form { margin: 0; }
+.user-nav button {
+  min-height: 2.5rem;
+  background: transparent;
+  color: var(--testo);
+  border-color: var(--linea-forte);
 }
-.site-footer a { color: var(--on-brand); }
+.user-nav button:hover { border-color: var(--oro); background: transparent; }
+.user-nav .btn { min-height: 2.5rem; }
 
-label { display: block; font-weight: 600; margin-bottom: 0.25rem; }
-input, select, textarea, button { font: inherit; }
-input[type="text"], input[type="email"], input[type="password"], input[type="search"], select, textarea {
+/* --- 7. Contenuto ------------------------------------------------------------- */
+main {
   width: 100%;
-  max-width: 32rem;
-  padding: 0.5rem;
-  border: 1px solid #6b7280;   /* contrasto >= 3:1 sul bianco */
-  border-radius: 4px;
+  max-width: var(--larghezza);
+  margin: 0 auto;
+  padding: 2rem var(--spazio) 4rem;
 }
-button { padding: 0.5rem 1rem; min-height: 2.5rem; cursor: pointer; }
-fieldset { border: 1px solid var(--border); margin: 1rem 0; }
+section { margin-bottom: 1.5rem; }
 
-.field-error, .form-errors { color: var(--error); }
-.form-errors { border: 2px solid var(--error); padding: 0.5rem 1rem; }
-.flash { border: 2px solid var(--link); padding: 0.25rem 1rem; margin-bottom: 1rem; }
-.meta { color: var(--muted); }
+.meta { color: var(--tenue); font-size: 0.9rem; }
 
+.breadcrumb ol {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin: 0 0 1rem;
+  padding: 0;
+  list-style: none;
+  font-size: 0.9rem;
+  color: var(--tenue);
+}
+.breadcrumb li + li::before {
+  content: "/";
+  content: "/" / "";            /* testo alternativo vuoto: non viene letto */
+  margin-right: 0.35rem;
+}
+
+/* riquadro generico */
+main > form[data-validate],
+.search-page-form,
+.guide-side > section {
+  background: var(--pannello);
+  border: 1px solid var(--linea);
+  border-radius: var(--raggio);
+}
+
+/* --- 8. Home ---------------------------------------------------------------------
+   Mobile: tutto in colonna. Desktop: presentazione, ruoli e invito a sinistra,
+   ultime guide a destra. L'ordine visivo è lo stesso del codice. */
+.home {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-areas:
+    "hero"
+    "ruoli"
+    "invito"
+    "ultime";
+  gap: 1.5rem 3rem;
+}
+.hero   { grid-area: hero; }
+.roles  { grid-area: ruoli; margin: 0; }
+.cta    { grid-area: invito; }
+.latest { grid-area: ultime; }
+
+.eyebrow {
+  display: inline-block;
+  margin: 0 0 1.25rem;
+  padding: 0.3rem 0.8rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--oro);
+  border: 1px solid var(--oro);
+  border-radius: 999px;
+}
+.hero h1 {
+  font-size: 2.4rem;
+  line-height: 1.08;
+  max-width: 15em;
+}
+.highlight { color: var(--oro); }
+.lead {
+  margin: 0 0 1.75rem;
+  font-size: 1.1rem;
+  color: #c3cada;
+}
+
+/* ricerca grande: etichetta visibile sopra, campo con lente e pulsante */
+.hero-search {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.4rem 0.75rem;
+  max-width: 40rem;
+}
+.hero-search label {
+  grid-column: 1 / -1;
+  font-size: 0.85rem;
+  color: var(--tenue);
+}
+.hero-search input[type="search"] {
+  min-height: 3.25rem;
+  padding-left: 2.75rem;
+  background: var(--pannello) url("../images/icons/search.svg") no-repeat 0.9rem center / 1.25rem;
+  max-width: none;
+}
+.hero-search button { min-height: 3.25rem; padding: 0 1.75rem; }
+
+/* riquadri dei ruoli */
+.roles h2 { margin: 1rem 0 1rem; }
+.role-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(7.5rem, 100%), 1fr));
+  gap: 0.75rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.role-grid a {
+  display: grid;
+  justify-items: center;
+  gap: 0.5rem;
+  padding: 1.1rem 0.5rem;
+  background: var(--pannello);
+  border: 1px solid var(--linea);
+  border-radius: var(--raggio);
+  color: var(--testo);
+  font-family: var(--titoli);
+  font-size: 1.1rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: border-color 0.15s ease, transform 0.15s ease;
+}
+.role-grid a:hover { border-color: var(--oro); transform: translateY(-2px); }
+.role-grid img { width: 1.75rem; height: 1.75rem; }
+
+/* invito a scrivere una guida */
+.cta {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 1rem 1.25rem;
+  padding: 1.25rem;
+  background: var(--pannello);
+  border: 1px solid var(--linea);
+  border-radius: var(--raggio);
+}
+.cta > img {
+  width: 3rem;
+  height: 3rem;
+  padding: 0.75rem;
+  background: #2a2213;
+  border-radius: var(--raggio-piccolo);
+}
+.cta h2 { margin: 0 0 0.2rem; font-size: 1.2rem; }
+.cta p { margin: 0; color: #c3cada; }
+.cta .btn-outline { grid-column: 1 / -1; justify-self: start; }
+
+/* colonna "Ultime guide" */
+.latest {
+  padding: 1.25rem;
+  background: rgba(19, 26, 43, 0.85);
+  border: 1px solid var(--linea);
+  border-radius: 1rem;
+}
+.latest-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+.latest-head h2 { margin: 0; }
+.latest-head a { font-weight: 600; font-size: 0.9rem; text-decoration: none; }
+.latest-head a:hover { text-decoration: underline; }
+.latest-head a::after,
+.guide-card-foot a::after {
+  content: " →";
+  content: " →" / "";           /* freccia decorativa, non letta */
+}
+
+/* card di una guida */
+.guide-card {
+  margin-bottom: 1rem;
+  background: var(--pannello-2);
+  border: 1px solid var(--linea);
+  border-radius: var(--raggio);
+  overflow: hidden;
+}
+.guide-card:last-child { margin-bottom: 0; }
+.guide-card-banner {
+  position: relative;
+  height: 5.5rem;
+  overflow: hidden;
+}
+.guide-card-banner img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 22%;
+}
+/* velo scuro sopra l'immagine: le etichette restano leggibili */
+.guide-card-banner::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, rgba(11, 15, 26, 0.85), rgba(11, 15, 26, 0.25));
+}
+.guide-card .tags {
+  position: absolute;
+  left: 1rem;
+  bottom: 0.75rem;
+  z-index: 1;
+  margin: 0;
+}
+.guide-card-body { padding: 1rem; }
+.guide-card h3 { margin-bottom: 0.4rem; }
+.excerpt {
+  margin: 0 0 0.9rem;
+  font-size: 0.9rem;
+  color: var(--tenue);
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.guide-card-foot {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--tenue);
+}
+.guide-card-foot strong { color: var(--testo); }
+.guide-card-foot a { font-weight: 600; text-decoration: none; }
+.guide-card-foot a:hover { text-decoration: underline; }
+
+/* --- 9. Elenco guide (pagina Guide / ricerca) ----------------------------------- */
+.search-page-form {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(14rem, 100%), 1fr));
+  gap: 0 1rem;
+  align-items: end;
+  max-width: 50rem;
+  padding: 1.25rem;
+}
+.search-page-form p:last-child { margin-bottom: 1rem; }
+
+.guide-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(22rem, 100%), 1fr));
+  gap: 0.75rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.guide-item {
+  display: grid;
+  grid-template-columns: 4rem minmax(0, 1fr);
+  align-items: center;
+  gap: 1rem;
+  max-width: none;
+  padding: 0.75rem;
+  background: var(--pannello);
+  border: 1px solid var(--linea);
+  border-radius: var(--raggio);
+}
+.guide-item img {
+  width: 4rem;
+  height: 4rem;
+  object-fit: cover;
+  object-position: center 20%;
+  border-radius: var(--raggio-piccolo);
+}
+.guide-item a { font-family: var(--titoli); font-size: 1.1rem; font-weight: 600; }
+.guide-item p { margin: 0.2rem 0 0; font-size: 0.85rem; color: var(--tenue); }
+
+/* --- 10. Campioni ------------------------------------------------------------------ */
 .card-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(14rem, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(11rem, 100%), 1fr));
   gap: 1rem;
 }
+.champion-card {
+  display: grid;
+  grid-template-rows: auto auto 1fr auto;
+  background: var(--pannello);
+  border: 1px solid var(--linea);
+  border-radius: var(--raggio);
+  overflow: hidden;
+}
+.champion-card img {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 3 / 4;
+  object-fit: cover;
+  object-position: top;
+  border-bottom: 2px solid var(--oro);
+}
+.champion-card h3 { margin: 0.75rem 0.9rem 0.1rem; }
+.champion-card p { margin: 0 0.9rem 0.75rem; font-size: 0.875rem; color: var(--tenue); }
+.champion-card p:last-child { color: var(--testo); }
 
-table { border-collapse: collapse; width: 100%; }
-th, td { border: 1px solid var(--border); padding: 0.5rem; text-align: left; }
+/* filtro dei campioni */
+form[action="champions.php"] {
+  display: grid;
+  grid-template-columns: minmax(0, 18rem) auto;
+  justify-content: start;
+  align-items: end;
+  gap: 0.3rem 0.5rem;
+}
+form[action="champions.php"] label { grid-column: 1 / -1; margin: 0; }
 
-/* Nessuna dipendenza dal colore da solo: i link nel testo restano sottolineati. */
+/* --- 11. Dettaglio guida ------------------------------------------------------------ */
+.guide-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0 3rem;
+}
+.guide-side > section { padding: 0.25rem 1.25rem 1rem; margin-top: 1.5rem; }
+.guide-side h2 { font-size: 1.2rem; margin-top: 1rem; }
 
+section[aria-labelledby="build"] ul {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(12rem, 100%), 1fr));
+  gap: 0.5rem;
+  padding: 0;
+  list-style: none;
+}
+section[aria-labelledby="build"] li {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.45rem 0.6rem;
+  background: var(--pannello);
+  border: 1px solid var(--linea);
+  border-radius: var(--raggio-piccolo);
+  font-size: 0.9rem;
+}
+section[aria-labelledby="build"] img { width: 2rem; height: 2rem; border-radius: 0.25rem; }
+
+section[aria-labelledby="commenti"] > ul { padding: 0; list-style: none; }
+section[aria-labelledby="commenti"] > ul > li {
+  max-width: none;
+  margin-bottom: 0.75rem;
+  padding: 0.75rem 1rem;
+  background: var(--pannello);
+  border: 1px solid var(--linea);
+  border-left: 3px solid var(--oro);
+  border-radius: var(--raggio-piccolo);
+}
+section[aria-labelledby="commenti"] li p { margin: 0.25rem 0; }
+
+/* "Segnala": modulo chiuso in un <details> nativo (accessibile da tastiera) */
+details.report { margin: 0.5rem 0; }
+details.report summary {
+  display: inline-block;
+  min-height: 1.5rem;
+  cursor: pointer;
+  color: var(--oro);
+  text-decoration: underline;
+  font-size: 0.9rem;
+}
+
+/* --- 12. Moduli ------------------------------------------------------------------------ */
+form { margin: 0 0 1rem; }
+form p { margin: 0 0 1rem; }
+
+label { display: block; font-weight: 600; margin-bottom: 0.35rem; }
+label.inline-label { display: inline; font-weight: 400; }
+
+input, select, textarea { font: inherit; }
+
+input[type="text"], input[type="email"], input[type="password"],
+input[type="search"], select, textarea {
+  width: 100%;
+  max-width: 34rem;
+  padding: 0.6rem 0.75rem;
+  background: var(--sfondo);
+  color: var(--testo);
+  border: 2px solid var(--linea-forte);
+  border-radius: var(--raggio-piccolo);
+}
+input:hover, select:hover, textarea:hover { border-color: var(--tenue); }
+textarea { min-height: 8rem; resize: vertical; }
+input[type="checkbox"] {
+  width: 1.25rem;
+  height: 1.25rem;
+  vertical-align: -0.2em;
+  accent-color: var(--oro);
+}
+
+main > form[data-validate] { max-width: 40rem; padding: 1.5rem; }
+
+fieldset {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(10rem, 100%), 1fr));
+  gap: 0.25rem 1rem;
+  margin: 0 0 1.25rem;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--linea-forte);
+  border-radius: var(--raggio-piccolo);
+}
+fieldset p { margin: 0.25rem 0; }
+legend { padding: 0 0.4rem; font-weight: 600; }
+
+/* messaggi */
+.field-error { color: var(--errore); font-weight: 600; margin: 0.3rem 0 0; }
+[aria-invalid="true"] { border-color: var(--errore); }
+.form-errors,
+.flash {
+  margin-bottom: 1.5rem;
+  padding: 0.5rem 1rem;
+  background: var(--pannello);
+  border: 1px solid var(--linea);
+  border-left-width: 0.3rem;
+  border-radius: var(--raggio-piccolo);
+}
+.form-errors { border-left-color: var(--errore); color: var(--errore); }
+.flash { border-left-color: var(--successo); }
+
+/* --- 13. Tabelle (area amministrazione) ------------------------------------------------ */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--pannello);
+  font-size: 0.9rem;
+}
+caption {
+  text-align: left;
+  font-family: var(--titoli);
+  font-weight: 700;
+  padding: 0.5rem 0;
+}
+th, td {
+  padding: 0.6rem;
+  border: 1px solid var(--linea);
+  text-align: left;
+  vertical-align: top;
+  overflow-wrap: anywhere;
+}
+thead th { background: var(--pannello-2); color: var(--oro); }
+tbody tr:nth-child(even) { background: var(--sfondo-2); }   /* righe alternate */
+td form { display: inline-block; margin: 0 0.25rem 0.25rem 0; }
+
+section > ul > li form { margin: 0.4rem 0 0.75rem; }
+
+/* --- 14. Piè di pagina ------------------------------------------------------------------- */
+.site-footer {
+  background: var(--sfondo-2);
+  border-top: 1px solid var(--linea);
+  font-size: 0.9rem;
+}
+.footer-inner,
+.footer-bottom {
+  max-width: var(--larghezza);
+  margin: 0 auto;
+  padding: 2.5rem var(--spazio);
+}
+.footer-inner {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(10rem, 100%), 1fr));
+  gap: 2rem;
+}
+.footer-brand p { margin: 0 0 0.5rem; color: var(--tenue); }
+.footer-brand .brand-text { color: var(--testo); font-size: 1.25rem; }
+.footer-title {
+  margin: 0 0 0.75rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--oro);
+}
+.footer-nav ul { margin: 0; padding: 0; list-style: none; }
+.footer-nav li { margin-bottom: 0.4rem; }
+.footer-nav a { color: #c3cada; text-decoration: none; }
+.footer-nav a:hover { color: var(--testo); text-decoration: underline; }
+.footer-bottom {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0.5rem 2rem;
+  padding-top: 1.25rem;
+  padding-bottom: 1.5rem;
+  border-top: 1px solid var(--linea);
+  font-size: 0.8rem;
+  color: var(--tenue);
+}
+.footer-bottom p { margin: 0; }
+
+/* --- 15. Schermi medi -------------------------------------------------------------------- */
+@media screen and (min-width: 48em) {
+  .header-inner {
+    grid-template-columns: auto 1fr auto;
+    grid-template-areas: "brand nav user";
+    align-items: center;
+    gap: 1rem 2.5rem;
+    padding: 0.9rem 2rem;
+  }
+  main { padding: 3rem 2rem 5rem; }
+  h1 { font-size: 2.5rem; }
+  .hero h1 { font-size: 3.25rem; }
+
+  .cta {
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    padding: 1.5rem;
+  }
+  .cta .btn-outline { grid-column: auto; }
+
+  .footer-inner { grid-template-columns: 2fr repeat(3, 1fr); padding: 3rem 2rem; }
+  .footer-bottom { padding-left: 2rem; padding-right: 2rem; }
+}
+
+/* --- 16. Schermi larghi ------------------------------------------------------------------ */
+@media screen and (min-width: 64em) {
+  .home {
+    grid-template-columns: minmax(0, 1fr) 25rem;
+    grid-template-areas:
+      "hero   ultime"
+      "ruoli  ultime"
+      "invito ultime";
+    align-items: start;
+  }
+  .hero h1 { font-size: 3.6rem; }
+
+  .guide-layout {
+    grid-template-columns: minmax(0, 1fr) 20rem;
+    align-items: start;
+  }
+}
+
+/* --- 17. Preferenze dell'utente ------------------------------------------------------------ */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.01ms !important;
@@ -124,6 +801,9 @@ th, td { border: 1px solid var(--border); padding: 0.5rem; text-align: left; }
   }
 }
 
-@media (max-width: 40rem) {
-  .site-header { flex-direction: column; align-items: flex-start; }
+/* alto contrasto di Windows: i decori spariscono, bordi e testo restano */
+@media (forced-colors: active) {
+  body { background-image: none; }
+  .tag, .eyebrow, button, .btn, .btn-outline { border: 1px solid CanvasText; }
+  .guide-card-banner::after { display: none; }
 }

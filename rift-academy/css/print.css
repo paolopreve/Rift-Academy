@@ -1,4 +1,11 @@
-/* Stile di stampa: nasconde la navigazione e mostra solo il contenuto. */
-.site-header nav, .search-form, .user-nav, .skip-link, .site-footer { display: none; }
-body { color: #000; background: #fff; }
-a::after { content: " (" attr(href) ")"; font-size: 0.85em; }
+/* Stile di stampa: solo il contenuto, nero su bianco, caratteri con grazie. */
+.site-header, .skip-link, .site-footer, form, details.report, .cta, .roles, .guide-card-banner { display: none; }
+body { display: block; color: #000; background: #fff; font-family: Georgia, "Times New Roman", serif; font-size: 12pt; }
+h1, h2, h3, .highlight, a, .eyebrow { color: #000; }
+main { max-width: none; padding: 0; }
+.latest, .guide-card, .champion-card, .guide-item, .guide-side > section { background: #fff; color: #000; border: 1px solid #999; }
+.home, .guide-layout { display: block; }
+.guide-card, .champion-card, .guide-item { break-inside: avoid; }
+.excerpt, .guide-card-foot, .meta, .guide-item p { color: #333; }
+/* indirizzo dei link dopo il testo (solo nel contenuto) */
+main a::after { content: " (" attr(href) ")"; font-size: 0.85em; }

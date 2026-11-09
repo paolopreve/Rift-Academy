@@ -3,24 +3,30 @@
 </nav>
 <h1>{{guide_title}}</h1>
 <p class="meta">{{guide_meta}}</p>
-<section aria-labelledby="azioni">
-  <h2 id="azioni">Azioni</h2>
-  {{guide_actions}}
-</section>
-<section aria-labelledby="valutazione">
-  <h2 id="valutazione">Valutazione</h2>
-  {{rating}}
-</section>
-<section aria-labelledby="strategia">
-  <h2 id="strategia">Strategia</h2>
-  {{guide_strategy}}
-</section>
-<section aria-labelledby="build">
-  <h2 id="build">Build e rune</h2>
-  {{guide_build}}
-</section>
-<section aria-labelledby="commenti">
-  <h2 id="commenti">Commenti</h2>
-  {{comments}}
-  {{comment_form}}
-</section>
+<div class="guide-layout">
+  <div class="guide-main">
+    <section aria-labelledby="strategia">
+      <h2 id="strategia">Strategia</h2>
+      {{guide_strategy}}
+    </section>
+    <section aria-labelledby="build">
+      <h2 id="build"><span lang="en">Build</span> e rune</h2>
+      {{guide_build}}
+    </section>
+    <section aria-labelledby="commenti">
+      <h2 id="commenti">Commenti</h2>
+      {{comments}}
+      {{comment_form}}
+    </section>
+  </div>
+  <aside class="guide-side" aria-label="Valutazione e azioni sulla guida">
+    <section aria-labelledby="valutazione">
+      <h2 id="valutazione">Valutazione</h2>
+      {{rating}}
+    </section>
+    <section aria-labelledby="azioni">
+      <h2 id="azioni">Azioni</h2>
+      {{guide_actions}}
+    </section>
+  </aside>
+</div>

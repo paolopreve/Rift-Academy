@@ -3,7 +3,7 @@ services:
     build: .
     container_name: rift_web
     ports:
-      - "8080:80"
+      - "8081:80"
     volumes:
       - ./rift-academy:/var/www/html
     environment:
@@ -25,7 +25,8 @@ services:
       - "3306:3306"
     volumes:
       - db_data:/var/lib/mysql
-      - ./rift-academy/sql:/docker-entrypoint-initdb.d
+      - ./rift-academy/sql/schema.sql:/docker-entrypoint-initdb.d/01_schema.sql
+      - ./rift-academy/sql/data.sql:/docker-entrypoint-initdb.d/02_data.sql
 
 volumes:
   db_data:
