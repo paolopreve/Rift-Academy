@@ -1,5 +1,4 @@
-# TechWeb
-# ⚔️ Rift Academy — League of Legends Guide & Build Portal
+# ⚔️ Rift Academy — Guide e build per League of Legends
 
 ![HTML5](https://img.shields.io/badge/HTML5-E34F26?style=for-the-badge&logo=html5&logoColor=white)
 ![CSS3](https://img.shields.io/badge/CSS3-1572B6?style=for-the-badge&logo=css3&logoColor=white)
@@ -7,238 +6,240 @@
 ![PHP](https://img.shields.io/badge/PHP-777BB4?style=for-the-badge&logo=php&logoColor=white)
 ![MySQL](https://img.shields.io/badge/MySQL-4479A1?style=for-the-badge&logo=mysql&logoColor=white)
 
-> **Rift Academy** è una piattaforma web dinamica e responsive progettata per la community di League of Legends. Sviluppata come progetto d'esame per il corso di **Tecnologie Web** presso l'**Università degli Studi di Padova**.
-
-> [!NOTE]
-> **Stato del progetto:** il repository contiene lo scheletro completo (pagine, controlli di accesso, template, schema del database). La logica di ogni pagina è ancora da completare: cerca `TODO` nei file per vedere cosa manca. Rimuovi questa nota a lavoro finito.
+> **Rift Academy** è un sito dinamico e responsive per la community di League of Legends: guide, build e rune per ogni campione e ruolo, scritte dai giocatori. Progetto d'esame per il corso di **Tecnologie Web** dell'**Università degli Studi di Padova**.
 
 ---
 
 ## 📌 Indice
-- [Descrizione del Progetto](#-descrizione-del-progetto)
-- [Tech Stack & Architettura](#-tech-stack--architettura)
-- [Funzionalità & Ruoli Utente](#-funzionalità--ruoli-utente)
-- [Struttura del Repository](#-struttura-del-repository)
-- [Sicurezza & Accessibilità](#-sicurezza--accessibilità)
-- [Guida all'Installazione](#-guida-allinstallazione)
-- [Note per lo Sviluppo](#-note-per-lo-sviluppo)
-- [Installazione sul Server del Corso](#-installazione-sul-server-del-corso)
-- [Prima della Consegna](#-prima-della-consegna)
-- [Credenziali di Test](#-credenziali-di-test)
+- [Descrizione del progetto](#-descrizione-del-progetto)
+- [Tecnologie e architettura](#️-tecnologie-e-architettura)
+- [Funzionalità e ruoli utente](#-funzionalità-e-ruoli-utente)
+- [Grafica](#-grafica)
+- [Struttura del repository](#-struttura-del-repository)
+- [Sicurezza, accessibilità e SEO](#-sicurezza-accessibilità-e-seo)
+- [Avvio in locale](#-avvio-in-locale)
+- [Note per lo sviluppo](#-note-per-lo-sviluppo)
+- [Installazione sul server del corso](#-installazione-sul-server-del-corso)
+- [Prima della consegna](#-prima-della-consegna)
+- [Credenziali di test](#-credenziali-di-test)
 
 ---
 
-## 📖 Descrizione del Progetto
+## 📖 Descrizione del progetto
 
-Rift Academy offre agli appassionati di League of Legends un ambiente interattivo per:
-- 📖 **Consultare e creare guide** strategiche complete per ogni campione.
-- 🛡️ **Pianificare build** ottimizzate per item e rune.
-- 💬 **Interagire** con la community tramite voti, commenti, preferiti e segnalazioni.
-- ⚙️ **Moderare i contenuti** tramite un pannello di amministrazione dedicato.
+Rift Academy permette di:
+- 📖 **leggere e scrivere guide** strategiche per ogni campione;
+- 🛡️ **proporre build** di oggetti e rune;
+- 🧭 **sfogliare le guide per ruolo** (Top, Jungle, Mid, Bot, Support) o cercarle per titolo e campione;
+- 💬 **interagire** con la community tramite voti, commenti, preferiti e segnalazioni;
+- ⚙️ **moderare i contenuti** da un pannello di amministrazione.
 
 ---
 
-## 🛠️ Tech Stack & Architettura
+## 🛠️ Tecnologie e architettura
 
-Il progetto segue una rigida **architettura a tre livelli** per garantire la completa separazione tra contenuto, presentazione e comportamento:
+Contenuto, presentazione e comportamento sono separati:
 
-| Livello | Tecnologia | Dettagli di Implementazione |
+| Livello | Tecnologia | Dettagli |
 | :--- | :--- | :--- |
-| **Frontend** | HTML5 Semantico | Accessibilità elevata, struttura valida XML / HTML5. Template HTML con segnaposto `{{nome}}` riempiti da PHP. |
-| **Styling** | CSS3 (Pure) | Flexbox & CSS Grid responsive, zero framework esterni. |
-| **Client Script** | Vanilla JS | Validazione form lato client, dinamismo ed elementi UX. |
-| **Backend** | PHP (7.4+) | Operazioni CRUD, gestione sessioni e ruoli utente. |
-| **Database** | MySQL / MariaDB | Struttura relazionale progettata in **Terza Forma Normale (3FN)**. |
+| **Struttura** | HTML5 semantico | Sintassi compatibile XML. Template in `templates/` con segnaposto `{{nome}}` riempiti da PHP. |
+| **Presentazione** | CSS3 puro | Mobile first, CSS Grid e Flexbox, variabili in `:root`, nessun framework. |
+| **Comportamento** | JavaScript vanilla | Validazione dei form lato client (miglioramento progressivo: il sito funziona anche senza JS). |
+| **Backend** | PHP 7.3+ | Nessun framework. Sessioni, ruoli, CRUD. Con Docker gira su PHP 8.2. |
+| **Database** | MySQL / MariaDB | InnoDB, utf8mb4, schema in terza forma normale (3FN). |
 
 ---
 
-## 👥 Funzionalità & Ruoli Utente
+## 👥 Funzionalità e ruoli utente
 
 ```mermaid
 graph TD
-    A[Visitatore Anonimo] -->|Visualizza & Cerca| B[Catalogo Guide / Campioni]
-    C[Utente Registrato] -->|Crea / Modifica / Elimina| D[Proprie Guide & Commenti]
-    E[Amministratore] -->|Modera & Gestisce| F[Utenti, Content & Database]
+    A[Visitatore] -->|Legge e cerca| B[Guide e campioni]
+    C[Utente registrato] -->|Crea, modifica, elimina| D[Proprie guide e commenti]
+    E[Amministratore] -->|Modera e gestisce| F[Utenti, contenuti e catalogo]
 ```
 
-### 1. 🌐 Visitatore (Anonimo)
-- Esplorazione della **Home Page** con guide in evidenza.
-- **Ricerca testuale** su guide e campioni.
-- Consultazione del **catalogo campioni** filtrabile per ruolo (*Top, Jungle, Mid, Bot, Support*).
-- Lettura dei dettagli delle guide e dei commenti.
+### 1. 🌐 Visitatore
+- **Home** con presentazione, ricerca, riquadri "Sfoglia per ruolo" e ultime guide.
+- **Pagina Guide** (`search.php`): elenco di tutte le guide, ricerca per titolo o campione e filtro per corsia.
+- **Catalogo campioni** filtrabile per ruolo.
+- Lettura delle guide (strategia, oggetti, rune, voto medio) e dei commenti.
 
-### 2. 👤 Utente Registrato (`user`)
-- **Autenticazione:** Registrazione, Login e Logout sicuri.
-- **Operazioni CRUD:**
-  - **Create:** Pubblicazione di nuove guide con campi di testo libero per le strategie.
-  - **Update:** Modifica delle proprie guide pubblicate.
-  - **Delete:** Cancellazione delle proprie guide.
-- **Interattività:** Commenti in testo libero, valutazione delle guide altrui (una per guida), guide preferite e segnalazione di contenuti inappropriati.
+### 2. 👤 Utente registrato (`user`)
+- Registrazione, login e logout.
+- **Guide:** creazione, modifica ed eliminazione delle proprie guide.
+- **Interazione:** commenti, un voto da 1 a 5 per guida (non sulle proprie), preferiti, segnalazioni di guide e commenti.
+- **Profilo** con le proprie guide e i preferiti.
 
 ### 3. 🛡️ Amministratore (`admin`)
-- **Dashboard Riservata:** Accesso al pannello di controllo amministrativo/gestionale.
-- **Moderazione:** Eliminazione immediata di contenuti inappropriati o offensivi e gestione delle segnalazioni ricevute.
-- **Gestione Utenti:** Sospensione (blocco del login), riattivazione ed eliminazione degli account.
-- **Gestione Game Data:** Inserimento e aggiornamento dei campioni, degli oggetti e delle rune nel database.
+- **Moderazione:** segnalazioni aperte, eliminazione di guide e commenti.
+- **Utenti:** sospensione (blocca il login ma conserva i contenuti), riattivazione, eliminazione.
+- **Catalogo:** inserimento e modifica dei campioni e dei loro ruoli.
 
 ---
 
-## 📂 Struttura del Repository
+## 🎨 Grafica
 
-Tutte le pagine stanno nella radice, così i link relativi restano semplici.
+- **Tema scuro** con accento oro (`#f2b53a`). Griglia di sfondo e bagliore fatti solo con gradienti CSS, senza immagini.
+- **Font locali** in `fonts/`: *Chakra Petch* per i titoli, *Inter* per il testo, entrambi con licenza SIL OFL (file di licenza inclusi). Nessun link a CDN esterne.
+- **Icone e logo originali** in SVG: `images/logo.svg`, `images/roles/` (un'icona per ruolo), `images/icons/`.
+- **Immagini dei campioni** in due versioni: l'originale `.jpg` e una ridotta `-small.webp` (circa 15 KB) usata nelle card. La funzione `img_small()` in `includes/functions.php` sceglie la versione ridotta se esiste.
+- **Layout:** in home, presentazione, ruoli e invito a scrivere a sinistra e "Ultime guide" a destra. Nel dettaglio guida, contenuto a sinistra e voto e azioni a destra. Su mobile tutto passa in una colonna, sempre nello stesso ordine del codice.
+
+---
+
+## 📂 Struttura del repository
 
 ```plaintext
-rift-academy/
-├── 📄 index.php              # Home: ultime guide e ricerca rapida
-├── 📄 champions.php          # Catalogo campioni e filtri per ruolo
-├── 📄 guide_detail.php       # Dettaglio guida, voti e commenti
-├── 📄 search.php             # Risultati della ricerca testuale
-├── 📄 404.php                # Pagina di errore personalizzata
-│
-├── 📄 login.php              # Accesso
-├── 📄 register.php           # Registrazione
-├── 📄 logout.php             # Logout (solo POST)
-├── 📄 create_guide.php       # Form creazione guida (campo testo libero)
-├── 📄 edit_guide.php         # Modifica guida (autore o admin)
-├── 📄 delete_guide.php       # Eliminazione guida (solo POST)
-├── 📄 profile.php            # Proprie guide e preferiti
-├── 📄 comment_action.php     # Crea/elimina commento (solo POST)
-├── 📄 rate_guide.php         # Valutazione 1-5 (solo POST)
-├── 📄 favorite_toggle.php    # Aggiunge/rimuove preferito (solo POST)
-├── 📄 report_content.php     # Segnalazione contenuto (solo POST)
-│
-├── 📄 admin_dashboard.php    # Moderazione guide, commenti e segnalazioni
-├── 📄 admin_users.php        # Sospensione/eliminazione utenti
-├── 📄 admin_champions.php    # Catalogo campioni, oggetti e rune
-│
-├── 📄 .htaccess              # Pagina 404 e codifica (vedi commenti nel file)
-├── 📁 includes/              # Codice PHP condiviso
-│   ├── config.php            #   credenziali del database
-│   ├── db.php                #   connessione PDO
-│   ├── auth.php              #   sessione, ruoli, token CSRF
-│   └── functions.php         #   escape, messaggi, render_page()
-├── 📁 templates/             # HTML con segnaposto {{nome}}: header, footer e una pagina per file PHP
-├── 📁 css/                   # style.css (layout responsive), print.css (stampa)
-├── 📁 js/                    # validation.js (validazione client), nav.js (UX)
-├── 📁 img/                   # logo.svg, champions/, items/, runes/ (immagini in locale)
-├── 📁 sql/                   # schema.sql (tabelle) e data.sql (ruoli e utenti di test)
-├── 📁 tools/                 # Strumenti locali, NON da caricare sul server
-│   └── import_datadragon.py  #   genera gli INSERT dei campioni da Data Dragon
-└── 📄 relazione.pdf          # Documento di relazione per la consegna dell'esame
+Rift-Academy/
+├── 📄 Dockerfile, docker-compose.yml   # Ambiente locale (Apache + PHP 8.2, MySQL 8)
+├── 📄 build-order.md                   # Ordine seguito per completare i file
+└── 📁 rift-academy/                    # Il sito (questa cartella va sul server)
+    ├── 📄 index.php              # Home
+    ├── 📄 champions.php          # Catalogo campioni con filtro per ruolo
+    ├── 📄 search.php             # Elenco guide, ricerca e filtro per corsia
+    ├── 📄 guide_detail.php       # Dettaglio guida, voti, commenti
+    ├── 📄 404.php                # Pagina di errore
+    │
+    ├── 📄 login.php, register.php, logout.php
+    ├── 📄 create_guide.php, edit_guide.php, delete_guide.php
+    ├── 📄 profile.php            # Proprie guide e preferiti
+    ├── 📄 comment_action.php     # Crea/elimina commento (solo POST)
+    ├── 📄 rate_guide.php         # Voto 1-5 (solo POST)
+    ├── 📄 favorite_toggle.php    # Aggiunge/rimuove preferito (solo POST)
+    ├── 📄 report_content.php     # Segnalazione (solo POST)
+    │
+    ├── 📄 admin_dashboard.php    # Moderazione e segnalazioni
+    ├── 📄 admin_users.php        # Gestione utenti
+    ├── 📄 admin_champions.php    # Catalogo campioni
+    │
+    ├── 📄 .htaccess              # Codifica, 404, cache e compressione
+    ├── 📁 includes/              # config.php, db.php, auth.php, functions.php
+    ├── 📁 templates/             # header, footer e un template per pagina
+    ├── 📁 css/                   # style.css (schermo), print.css (stampa)
+    ├── 📁 js/                    # validation.js, nav.js
+    ├── 📁 fonts/                 # Chakra Petch e Inter (woff2) + licenze OFL
+    ├── 📁 images/                # logo, roles/, icons/, champions/, items/, runes/
+    └── 📁 sql/                   # schema.sql (tabelle) e data.sql (dati di esempio)
 ```
 
 ---
 
-## 🔒 Sicurezza & Accessibilità
+## 🔒 Sicurezza, accessibilità e SEO
 
-> [!IMPORTANT]
-> Il progetto rispetta appieno le linee guida e le specifiche del corso di Tecnologie Web.
+### 🛡️ Sicurezza
+- **Prepared statement** PDO in tutte le query (niente SQL injection). Nelle ricerche `LIKE` i caratteri `%` e `_` vengono resi innocui.
+- **Escape in output** con `e()` (`htmlspecialchars`) ogni volta che si stampa un dato inserito da un utente (niente XSS).
+- Password con `password_hash()` / `password_verify()`.
+- **Autorizzazione lato server** su ogni modifica o cancellazione: autore o admin, altrimenti HTTP 403.
+- **Token CSRF** in tutti i form POST, `session_regenerate_id()` al login, cookie di sessione `HttpOnly` e `SameSite=Lax`, login bloccato per gli utenti sospesi.
 
-- **🛡️ Sicurezza Backend:**
-  - **Prepared Statements** (PDO) per impedire attacchi **SQL Injection**.
-  - **Escape in output** con `htmlspecialchars()` per la prevenzione di vulnerabilità **XSS** (si applica quando si stampa un dato inserito da un utente, non quando lo si salva).
-  - Password salvate con `password_hash()` e verificate con `password_verify()`.
-  - **Controllo di autorizzazione lato server** su ogni modifica o cancellazione (autore o admin): nascondere un pulsante non basta.
-  - **Token CSRF** in tutti i form POST, `session_regenerate_id()` al login, cookie di sessione `HttpOnly` e `SameSite`, blocco del login per gli utenti sospesi.
-- **♿ Accessibilità & UX** (obiettivo: WCAG 2.2 AA):
-  - HTML nativo prima di ARIA, landmark semantici, link "Salta al contenuto" e un solo `h1` per pagina.
-  - Piena navigabilità da tastiera con indicatore di focus sempre visibile.
-  - Form con etichette visibili e messaggi di errore collegati ai campi (`aria-invalid`, `aria-describedby`).
-  - Layout fluido e responsive (reflow a 320 px, zoom fino al 400%) per dispositivi mobile, tablet e desktop.
-  - Rispetto di `prefers-reduced-motion` e foglio di stile dedicato alla stampa (`print.css`).
-- **📑 SEO:** `title` e `meta description` unici per pagina, struttura dei titoli coerente, breadcrumb nelle pagine di dettaglio.
+### ♿ Accessibilità (obiettivo WCAG 2.2 AA)
+- Landmark semantici, un solo `h1` per pagina, titoli in ordine, `aria-current="page"` sulla voce di menu attiva.
+- Link **"Salta al contenuto"**: è il primo elemento raggiungibile con Tab e compare quando riceve il focus.
+- Navigazione completa da tastiera, focus sempre visibile (anello oro, contrasto 10:1), ordine visivo uguale all'ordine del codice.
+- **Contrasti verificati:** testo almeno 4.5:1, bordi dei campi e focus almeno 3:1. Link sottolineati, link visitati di un altro colore.
+- **Lingua:** pagina in `lang="it"`, termini inglesi marcati con `<span lang="en">` (rank, build, community, patch, matchup, wave) per una pronuncia corretta con lo screen reader.
+- Form con etichette visibili, errori collegati ai campi (`aria-invalid`, `aria-describedby`), messaggi in `role="status"` / `role="alert"`.
+- Immagini decorative con `alt=""`, immagini informative con `alt` descrittivo. Moduli "Segnala" in `<details>` nativi.
+- Reflow a 320 px senza scroll orizzontale, zoom fino al 400%, `prefers-reduced-motion`, modalità ad alto contrasto di Windows (`forced-colors`), foglio di stampa dedicato.
+
+### ⚡ Prestazioni e SEO
+- `title`, `meta description` e `meta keywords` per ogni pagina, con valori di riserva in `render_page()`.
+- Font principali precaricati (`preload`), immagini ridotte in WebP, `loading="lazy"` sulle immagini fuori schermo, cache e compressione nel `.htaccess`.
+- **Lighthouse** sulla home: mobile 99 / 100 / 100 / 100, desktop 100 / 100 / 100 / 100 (Performance / Accessibilità / Best practice / SEO). Il test va fatto in una finestra in incognito: le estensioni del browser falsano i risultati.
 
 ---
 
-## 🚀 Guida all'Installazione
+## 🚀 Avvio in locale
 
-### Requisiti Preliminari
-- Web Server (**Apache** o **Nginx**) con PHP 7.4 o superiore. Il codice richiede almeno PHP 7.3: verifica la versione sul server del corso.
-- Server **MySQL / MariaDB** (InnoDB e FULLTEXT richiedono MySQL 5.6 o superiore).
-- Ambiente locale consigliato: **XAMPP**, **WAMP** o **Docker**.
+### Opzione A — Docker (consigliata)
 
-### Passaggi per l'esecuzione in locale
+```bash
+git clone https://github.com/paolopreve/Rift-Academy.git
+cd Rift-Academy
+docker compose up --build
+```
 
-1. **Clona la repository:**
-   ```bash
-   git clone https://github.com/tuo-username/rift-academy.git
-   cd rift-academy
+Apri **http://localhost:8081**. Al primo avvio MySQL importa da solo `sql/schema.sql` e `sql/data.sql`. Le credenziali del database arrivano da `docker-compose.yml`, quindi non serve toccare `config.php`.
+
+Per ripartire con un database pulito: `docker compose down -v` e poi di nuovo `docker compose up`.
+
+### Opzione B — XAMPP / WAMP
+
+1. Crea un database `rift_academy` e importa prima `rift-academy/sql/schema.sql`, poi `rift-academy/sql/data.sql`.
+2. Imposta le credenziali in `rift-academy/includes/config.php`:
+   ```php
+   define('DB_HOST', 'localhost');
+   define('DB_NAME', 'rift_academy');
+   define('DB_USER', 'root');
+   define('DB_PASS', '');
    ```
+3. Copia la cartella `rift-academy` in `htdocs` e apri `http://localhost/rift-academy/`.
 
-2. **Importa il Database:**
-   - Apri `phpMyAdmin` (o il tuo client MySQL).
-   - Crea un database denominato `rift_academy_db`.
-   - Importa prima `sql/schema.sql` e poi `sql/data.sql`.
-
-3. **Configura la Connessione:**
-   - Apri il file `includes/config.php` e imposta le tue credenziali locali:
-     ```php
-     define('DB_HOST', 'localhost');
-     define('DB_USER', 'root');
-     define('DB_PASS', '');
-     define('DB_NAME', 'rift_academy_db');
-     ```
-
-4. **Avvia l'applicazione:**
-   - Copia i file nella cartella `htdocs` (o root del web server) e apri `http://localhost/rift-academy`.
-   - In alternativa, dalla cartella del progetto: `php -S localhost:8000` e apri `http://localhost:8000/`.
+> [!WARNING]
+> Ora `config.php` ha `DB_NAME` impostato a `mysql`, che è il database di sistema di MySQL: con XAMPP va cambiato in `rift_academy`. Con Docker non serve, perché vince la variabile d'ambiente.
 
 ---
 
-## 🧰 Note per lo Sviluppo
+## 🧰 Note per lo sviluppo
 
-### Regole per i template HTML
-La sintassi deve essere compatibile con XML, come richiesto dalle specifiche:
-- tag in minuscolo e sempre chiusi: `<br />`, `<input ... />`, `<meta ... />`;
-- attributi sempre tra virgolette; gli attributi booleani hanno un valore: `required="required"`;
-- nessuno `style=""` e nessun `onclick=""` nel markup: CSS e JavaScript stanno solo nei file esterni.
+### HTML compatibile XML
+- Tag in minuscolo e sempre chiusi: `<br />`, `<input ... />`, `<img ... />`.
+- Attributi tra virgolette; quelli booleani hanno un valore: `required="required"`.
+- `&` scritto `&amp;` negli URL dentro gli attributi.
+- Niente `style=""`, `onclick=""`, `<style>` o `<script>` con logica nel markup: CSS e JS stanno solo nei file esterni.
+
+### Convenzioni
+- Solo **percorsi relativi** (`css/style.css`, mai `/css/style.css`).
+- Codice compatibile **PHP 7.3**: niente `match`, `str_contains`, `?->` e altre funzioni di PHP 8.
+- Commenti e testi per l'utente in italiano.
+- Nuove immagini dei campioni: aggiungi anche la versione `nome-small.webp` (larga 480 px) accanto al `.jpg`.
 
 ### Ruoli dei campioni
-I dati statici di Riot (Data Dragon) non contengono i ruoli di corsia (Top, Jungle, Mid, Bot, Support): vanno assegnati dalla pagina `admin_champions.php`.
-
-### Catalogo di campioni
-`tools/import_datadragon.py` genera `sql/champions_import.sql` con nomi, titoli e immagini (opzione `--images` per scaricarle in `img/champions/`). Lo script non è stato ancora testato: controlla l'output prima di importarlo.
+I dati di Riot (Data Dragon) non contengono i ruoli di corsia: si assegnano da `admin_champions.php`.
 
 ### Nota legale
-Nomi e immagini dei campioni appartengono a Riot Games. Il footer riporta il disclaimer che Rift Academy non è approvata né sponsorizzata da Riot Games.
+Nomi e immagini dei campioni appartengono a Riot Games. Il footer riporta che Rift Academy non è approvata né sponsorizzata da Riot Games.
 
 ---
 
-## 🌐 Installazione sul Server del Corso
+## 🌐 Installazione sul server del corso
 
-Il sito va installato su `tecweb.studenti.math.unipd.it`, nella home di uno dei componenti del gruppo. Verifica:
-- **Versioni** di PHP e MySQL (vedi Requisiti Preliminari): conviene provarle con una pagina di prova nella prima settimana.
+Il sito va su `tecweb.studenti.math.unipd.it`, nella home di uno dei componenti del gruppo. Si carica **solo** la cartella `rift-academy/`.
+- Verifica le **versioni** di PHP e MySQL con una pagina di prova.
+- Imposta le credenziali reali in `includes/config.php`.
 - **Permessi:** file `644`, cartelle `755`.
-- **Solo link relativi** (`css/style.css`, mai `/css/style.css`).
-- **Non caricare** la cartella `tools/`.
-- Se vuoi la pagina 404 personalizzata, sostituisci il percorso nel file `.htaccess` e togli il commento.
+- Per la 404 personalizzata, sostituisci il percorso nel `.htaccess` e togli il commento.
 
 ---
 
-## ✅ Prima della Consegna
+## ✅ Prima della consegna
 
 - [ ] Installazione da zero partendo dal dump del database
-- [ ] Validazione W3C di tutte le pagine
-- [ ] Prova solo da tastiera, zoom al 400% e controllo dei contrasti
-- [ ] Nessun `TODO` rimasto nei file
-- [ ] Credenziali di test funzionanti (admin e user) e riportate nella prima pagina della relazione
+- [ ] Validazione W3C di tutte le pagine (HTML e CSS)
+- [ ] Prova solo da tastiera, zoom al 400%, screen reader (NVDA) e controllo dei contrasti
+- [ ] Nessun `TODO` rimasto (ora resta solo in `js/nav.js`)
+- [ ] Credenziali di test funzionanti e riportate nella prima pagina della relazione
 - [ ] Zip per Moodle con sorgenti, dump del database (schema + dati) e `relazione.pdf`
 
 ---
 
-## 🔑 Credenziali di Test
+## 🔑 Credenziali di test
 
 > [!NOTE]
-> Credenziali predefinite fornite per la valutazione del progetto come da specifiche d'esame. Sono quelle create da `sql/data.sql`: se le cambi, aggiorna entrambi.
+> Sono gli utenti creati da `sql/data.sql`. Se cambi le password, aggiorna anche questo file.
 
 | Ruolo | Username | Password | Permessi |
 | :--- | :--- | :--- | :--- |
-| **Amministratore** | `admin` | `Admin2026!` | Accesso completo, moderazione e gestione DB |
-| **Utente Semplice** | `utente` | `User2026!` | Creazione, modifica ed eliminazione delle proprie guide |
+| **Amministratore** | `admin` | `Admin2026!` | Moderazione, utenti e catalogo |
+| **Utente** | `utente` | `User2026!` | Guide proprie, commenti, voti, preferiti |
 
 ---
 
-## 👨‍💻 Autori & Corso
+## 👨‍💻 Autori
 
-Progetto sviluppato dal gruppo di lavoro per l'insegnamento di **Tecnologie Web**  
-**Università degli Studi di Padova** — *Anno Accademico 2026/2027*
+Progetto per l'insegnamento di **Tecnologie Web** — **Università degli Studi di Padova**, A.A. 2026/2027.
+
+- [@paolopreve](https://github.com/paolopreve)
+- [@ericrosso](https://github.com/ericrosso)
