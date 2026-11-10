@@ -48,7 +48,7 @@ if (empty($reports)) {
         $rid = e($rep['id']);
         $reportsHtml .= '<li><p>Segnalazione di ' . e($rep['reporter']) . ' del ' . e($rep['created_at']) . ': ' . e($rep['reason']) . '</p>';
         if ($rep['guide_id'] !== null) {
-            $reportsHtml .= '<p>Guida: <a href="guide_detail.php?id=' . e($rep['guide_id']) . '">' . e($rep['guide_title']) . '</a></p>';
+            $reportsHtml .= '<p>Guida: <a href="guide_detail.php?id=' . e($rep['guide_id']) . '">' . en(e($rep['guide_title'])) . '</a></p>';
             $reportsHtml .= '<form action="admin_dashboard.php" method="post">' . csrf_field()
                 . '<input type="hidden" name="action" value="delete_guide" />'
                 . '<input type="hidden" name="guide_id" value="' . e($rep['guide_id']) . '" />'
@@ -78,7 +78,7 @@ if (empty($guides)) {
 } else {
     $latestHtml = '<ul>';
     foreach ($guides as $guide) {
-        $latestHtml .= '<li><a href="guide_detail.php?id=' . e($guide['id']) . '">' . e($guide['title']) . '</a> (di ' . e($guide['author_name']) . ')'
+        $latestHtml .= '<li><a href="guide_detail.php?id=' . e($guide['id']) . '">' . en(e($guide['title'])) . '</a> (di ' . e($guide['author_name']) . ')'
             . '<form action="admin_dashboard.php" method="post">' . csrf_field()
             . '<input type="hidden" name="action" value="delete_guide" />'
             . '<input type="hidden" name="guide_id" value="' . e($guide['id']) . '" />'

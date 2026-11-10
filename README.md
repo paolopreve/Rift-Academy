@@ -80,8 +80,8 @@ graph TD
 
 ## 🎨 Grafica
 
-- **Tema scuro** con accento oro (`#f2b53a`). Griglia di sfondo e bagliore fatti solo con gradienti CSS, senza immagini.
-- **Font locali** in `fonts/`: *Chakra Petch* per i titoli, *Inter* per il testo, entrambi con licenza SIL OFL (file di licenza inclusi). Nessun link a CDN esterne.
+- **Tema scuro** con accento oro (`#f2b53a`). Griglia di sfondo e bagliore dorato in un'unica immagine decorativa (`images/sfondo.webp`, 11 KB) impostata come sfondo nel CSS.
+- **Font di sistema**, nessun file da scaricare: `Verdana, Geneva, Tahoma, sans-serif` per il testo (x alta, lettere ben distinte) e `Georgia, "Times New Roman", Times, serif` per i titoli. Ogni elenco è chiuso dalla famiglia generica, come indicato nelle slide.
 - **Icone e logo originali** in SVG: `images/logo.svg`, `images/roles/` (un'icona per ruolo), `images/icons/`.
 - **Immagini dei campioni** in due versioni: l'originale `.jpg` e una ridotta `-small.webp` (circa 15 KB) usata nelle card. La funzione `img_small()` in `includes/functions.php` sceglie la versione ridotta se esiste.
 - **Layout:** in home, presentazione, ruoli e invito a scrivere a sinistra e "Ultime guide" a destra. Nel dettaglio guida, contenuto a sinistra e voto e azioni a destra. Su mobile tutto passa in una colonna, sempre nello stesso ordine del codice.
@@ -116,9 +116,8 @@ Rift-Academy/
     ├── 📄 .htaccess              # Codifica, 404, cache e compressione
     ├── 📁 includes/              # config.php, db.php, auth.php, functions.php
     ├── 📁 templates/             # header, footer e un template per pagina
-    ├── 📁 css/                   # style.css (schermo), print.css (stampa)
+    ├── 📁 css/                   # style.css (base e cellulare), desktop.css (tablet e computer), print.css (stampa)
     ├── 📁 js/                    # validation.js, nav.js
-    ├── 📁 fonts/                 # Chakra Petch e Inter (woff2) + licenze OFL
     ├── 📁 images/                # logo, roles/, icons/, champions/, items/, runes/
     └── 📁 sql/                   # schema.sql (tabelle) e data.sql (dati di esempio)
 ```
@@ -126,6 +125,17 @@ Rift-Academy/
 ---
 
 ## 🔒 Sicurezza, accessibilità e SEO
+
+### 🎨 Organizzazione del CSS
+Tre fogli di stile, collegati in `templates/header.html` con l'attributo `media`:
+
+| File | `media` | Contenuto |
+| :--- | :--- | :--- |
+| `css/style.css` | `screen` | Variabili, base, componenti e layout per **cellulare** (mobile first) |
+| `css/desktop.css` | `screen and (min-width: 48em)` | Solo le regole che cambiano su **tablet e computer** (da 64em la home e il dettaglio guida passano a due colonne) |
+| `css/print.css` | `print` | Foglio completo per la **stampa** |
+
+Ogni file è commentato sezione per sezione. I punti di passaggio sono in `em`, quindi seguono lo zoom del testo.
 
 ### 🛡️ Sicurezza
 - **Prepared statement** PDO in tutte le query (niente SQL injection). Nelle ricerche `LIKE` i caratteri `%` e `_` vengono resi innocui.
@@ -146,14 +156,20 @@ Rift-Academy/
 
 ### ⚡ Prestazioni e SEO
 - `title`, `meta description` e `meta keywords` per ogni pagina, con valori di riserva in `render_page()`.
-- Font principali precaricati (`preload`), immagini ridotte in WebP, `loading="lazy"` sulle immagini fuori schermo, cache e compressione nel `.htaccess`.
-- **Lighthouse** sulla home: mobile 99 / 100 / 100 / 100, desktop 100 / 100 / 100 / 100 (Performance / Accessibilità / Best practice / SEO). Il test va fatto in una finestra in incognito: le estensioni del browser falsano i risultati.
+- Nessun font da scaricare, immagini ridotte in WebP, `loading="lazy"` sulle immagini fuori schermo, cache e compressione nel `.htaccess`.
+- **Lighthouse** sulla home: mobile 100 / 100 / 100 / 100, desktop 100 / 100 / 100 / 100 (Performance / Accessibilità / Best practice / SEO). Il test va fatto in una finestra in incognito: le estensioni del browser falsano i risultati.
 
 ---
 
 ## 🚀 Avvio in locale
 
 ### Opzione A — Docker (consigliata)
+
+Su Windows bastano due doppi clic nella cartella del progetto:
+1. `scarica-immagini.bat` (solo la prima volta): scarica le splash art dei campioni da Data Dragon.
+2. `avvia-sito.bat`: avvia Docker e apre il sito nel browser.
+
+Oppure, da terminale:
 
 ```bash
 git clone https://github.com/paolopreve/Rift-Academy.git
@@ -234,6 +250,8 @@ Il sito va su `tecweb.studenti.math.unipd.it`, nella home di uno dei componenti 
 | :--- | :--- | :--- | :--- |
 | **Amministratore** | `admin` | `Admin2026!` | Moderazione, utenti e catalogo |
 | **Utente** | `utente` | `User2026!` | Guide proprie, commenti, voti, preferiti |
+
+`data.sql` crea anche tre utenti di esempio (`baronpit`, `wardbot`, `zaunite`, password `User2026!`), 19 campioni e 20 guide in italiano (4 per ruolo), con commenti, voti e segnalazioni.
 
 ---
 

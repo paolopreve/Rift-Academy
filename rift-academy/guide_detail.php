@@ -65,13 +65,13 @@ $stmt->execute([$guide_id]);
 $comments = $stmt->fetchAll();
 
 // Breadcrumb
-$breadcrumbHtml = '<ol><li><a href="index.php">Home</a></li><li aria-current="page">' . e($guide['title']) . '</li></ol>';
+$breadcrumbHtml = '<ol><li><a href="index.php"><span lang="en">Home</span></a></li><li aria-current="page">' . en(e($guide['title'])) . '</li></ol>';
 
 // Metadati (testo semplice, dentro un paragrafo)
 $metaText = 'Campione: ' . $guide['champion_name'] . ' | Ruolo: ' . $guide['role_name'] . ' | Patch: ' . $guide['patch']
-    . ' | Autore: ' . $guide['author_name'] . ' | Pubblicata il ' . $guide['created_at'];
+    . ' | Autore: ' . $guide['author_name'] . ' | Pubblicata il ' . data_breve($guide['created_at']);
 if ($guide['updated_at'] !== null) {
-    $metaText .= ' | Aggiornata il ' . $guide['updated_at'];
+    $metaText .= ' | Aggiornata il ' . data_breve($guide['updated_at']);
 }
 
 // Valutazione
@@ -95,7 +95,18 @@ if ($user !== null && !$isOwner) {
 }
 
 // Strategia: testo libero, escape e a capo
-$strategyHtml = '<p>' . nl2br(e($guide['strategy_text'])) . '</p>';
+// Strategia: ogni riga del testo diventa un paragrafo. Se la riga inizia con
+// un'etichetta breve seguita da due punti ("Fase di corsia: ..."), l'etichetta
+// va in grassetto. Il testo è escapato con e() e poi passa da en().
+$strategyHtml = '';
+foreach (preg_split('/\R+/', trim($guide['strategy_text'])) as $riga) {
+    $riga = en(e(trim($riga)));
+    if ($riga === '') {
+        continue;
+    }
+    $riga = preg_replace('/^([^:<]{3,30}):/u', '<strong>$1:</strong>', $riga);
+    $strategyHtml .= '<p>' . $riga . '</p>';
+}
 
 // Build e rune
 $buildHtml = '<h3>Oggetti</h3>';
@@ -104,7 +115,7 @@ if (empty($items)) {
 } else {
     $buildHtml .= '<ul>';
     foreach ($items as $item) {
-        $buildHtml .= '<li><img src="' . e($item['image_path']) . '" alt="" width="32" height="32" /> ' . e($item['name']) . '</li>';
+        $buildHtml .= '<li><img src="' . e($item['image_path']) . '" alt="" width="32" height="32" /> <span lang="en">' . e($item['name']) . '</span></li>';
     }
     $buildHtml .= '</ul>';
 }
@@ -114,7 +125,7 @@ if (empty($runes)) {
 } else {
     $buildHtml .= '<ul>';
     foreach ($runes as $rune) {
-        $buildHtml .= '<li><img src="' . e($rune['image_path']) . '" alt="" width="32" height="32" /> ' . e($rune['name']) . ' (' . e($rune['tree']) . ')</li>';
+        $buildHtml .= '<li><img src="' . e($rune['image_path']) . '" alt="" width="32" height="32" /> <span><span lang="en">' . e($rune['name']) . '</span> (<span lang="en">' . e($rune['tree']) . '</span>)</span></li>';
     }
     $buildHtml .= '</ul>';
 }
@@ -154,8 +165,8 @@ if (empty($comments)) {
     $commentsHtml = '<ul>';
     foreach ($comments as $comment) {
         $cid = e($comment['id']);
-        $commentsHtml .= '<li><p><strong>' . e($comment['username']) . '</strong> - ' . e($comment['created_at']) . '</p>';
-        $commentsHtml .= '<p>' . nl2br(e($comment['body'])) . '</p>';
+        $commentsHtml .= '<li><p><strong>' . e($comment['username']) . '</strong> - ' . e(data_breve($comment['created_at'])) . '</p>';
+        $commentsHtml .= '<p>' . nl2br(en(e($comment['body']))) . '</p>';
         if ($user !== null) {
             if (is_owner_or_admin((int) $comment['user_id'])) {
                 $commentsHtml .= '<form action="comment_action.php" method="post">' . csrf_field()
@@ -193,8 +204,8 @@ render_page('templates/guide_detail.html', [
     'keywords'    => 'League of Legends, ' . $guide['champion_name'] . ', ' . $guide['role_name'] . ', guida, build, rune, patch ' . $guide['patch'],
 ], [
     'breadcrumb'     => $breadcrumbHtml,
-    'guide_title'    => e($guide['title']),
-    'guide_meta'     => e($metaText),
+    'guide_title'    => en(e($guide['title'])),
+    'guide_meta'     => en(e($metaText)),
     'guide_actions'  => $actionsHtml,
     'rating'         => $ratingHtml,
     'guide_strategy' => $strategyHtml,

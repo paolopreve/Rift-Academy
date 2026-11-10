@@ -15,7 +15,7 @@ foreach ($roles as $role) {
     if ($isSelected) {
         $roleName = $role['name'];
     }
-    $roleOptionsHtml .= '<option value="' . e($role['id']) . '"' . ($isSelected ? ' selected="selected"' : '') . '>' . e($role['name']) . '</option>';
+    $roleOptionsHtml .= '<option value="' . e($role['id']) . '" lang="en"' . ($isSelected ? ' selected="selected"' : '') . '>' . e($role['name']) . '</option>';
 }
 if ($roleName === '') {
     $selectedRole = 0;
@@ -29,9 +29,9 @@ $resultsHtml = '';
     if ($searchQuery === '' && $roleName === '') {
         $resultsTitle = 'Tutte le guide';
     } elseif ($searchQuery !== '' && $roleName !== '') {
-        $resultsTitle = 'Risultati per "' . e($searchQuery) . '" nella corsia ' . e($roleName);
+        $resultsTitle = 'Risultati per "' . e($searchQuery) . '" nella corsia <span lang="en">' . e($roleName) . '</span>';
     } elseif ($roleName !== '') {
-        $resultsTitle = 'Guide per la corsia ' . e($roleName);
+        $resultsTitle = 'Guide per la corsia <span lang="en">' . e($roleName) . '</span>';
     } else {
         $resultsTitle = 'Risultati per "' . e($searchQuery) . '"';
     }
@@ -74,8 +74,8 @@ $resultsHtml = '';
         $resultsHtml .= '<ul class="guide-list">';
         foreach ($guides as $guide) {
             $resultsHtml .= '<li class="guide-item"><img src="' . e(img_small($guide['champion_image'])) . '" alt="" width="64" height="64" loading="lazy" decoding="async" />';
-            $resultsHtml .= '<div><a href="guide_detail.php?id=' . e($guide['id']) . '">' . e($guide['title']) . '</a>';
-            $resultsHtml .= '<p><span class="tag tag-role">' . e($guide['role_name']) . '</span> ' . e($guide['champion_name'])
+            $resultsHtml .= '<div><a href="guide_detail.php?id=' . e($guide['id']) . '">' . en(e($guide['title'])) . '</a>';
+            $resultsHtml .= '<p><span class="tag tag-role" lang="en">' . e($guide['role_name']) . '</span> ' . e($guide['champion_name'])
                 . ' · di ' . e($guide['author_name']) . ' · ' . e(data_breve($guide['created_at'])) . '</p></div></li>';
         }
         $resultsHtml .= '</ul>';

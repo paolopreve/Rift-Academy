@@ -98,7 +98,7 @@ $roleCheckboxes = '';
 foreach ($roles as $role) {
     $chk = in_array((int) $role['id'], $role_ids, true) ? ' checked="checked"' : '';
     $roleCheckboxes .= '<p><input id="role_' . e($role['id']) . '" type="checkbox" name="roles[]" value="' . e($role['id']) . '"' . $chk . ' /> '
-        . '<label class="inline-label" for="role_' . e($role['id']) . '">' . e($role['name']) . '</label></p>';
+        . '<label class="inline-label" for="role_' . e($role['id']) . '" lang="en">' . e($role['name']) . '</label></p>';
 }
 
 $champions = db()->query('SELECT c.id, c.name, c.image_path, GROUP_CONCAT(r.name ORDER BY r.id SEPARATOR \', \') AS role_names
@@ -112,7 +112,7 @@ $table = '<table><caption>Campioni nel catalogo</caption><thead><tr>'
     . '</tr></thead><tbody>';
 foreach ($champions as $champion) {
     $table .= '<tr><th scope="row">' . e($champion['name']) . '</th><td>' . e($champion['image_path']) . '</td><td>'
-        . e($champion['role_names'] !== null ? $champion['role_names'] : 'non assegnati') . '</td>'
+        . en(e($champion['role_names'] !== null ? $champion['role_names'] : 'non assegnati')) . '</td>'
         . '<td><a href="admin_champions.php?edit=' . e($champion['id']) . '">Modifica ' . e($champion['name']) . '</a></td></tr>';
 }
 $table .= '</tbody></table>';

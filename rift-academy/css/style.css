@@ -1,116 +1,156 @@
 /* ==========================================================================
-   Rift Academy - foglio di stile principale
-   Tema scuro con accento oro. CSS puro, mobile first: le regole base valgono
-   per lo smartphone, le media query (min-width) aggiungono colonne.
-   Layout con CSS Grid, unità relative (rem/em), colori in variabili :root.
-   Contrasti verificati: testo >= 4.5:1, bordi dei campi e focus >= 3:1.
+   RIFT ACADEMY - style.css
+   Foglio di stile BASE: vale per tutti gli schermi e, da solo, impagina il
+   sito per il CELLULARE (approccio "mobile first").
+
+   Come sono divisi i fogli di stile (collegati in templates/header.html):
+     1. style.css   -> media="screen"                       base + cellulare
+     2. desktop.css -> media="screen and (min-width: 48em)"  tablet e computer
+     3. print.css   -> media="print"                        stampa
+   È lo schema delle slide CSS (n. 20): un <link> per ogni dispositivo con
+   l'attributo media. Sono solo tre file, quindi poche richieste al server;
+   il browser scarica comunque desktop.css e print.css senza bloccare la
+   visualizzazione quando il loro media non corrisponde al dispositivo.
+
+   Indice
+     1. Variabili (colori, font, misure)
+     2. Base: box model, pagina, titoli, testo, link
+     3. Accessibilità: focus, link "Salta al contenuto", testo nascosto
+     4. Pulsanti ed etichette
+     5. Intestazione e menu
+     6. Contenuto e riquadri comuni
+     7. Home
+     8. Elenco guide (pagina Guide / ricerca)
+     9. Campioni
+    10. Dettaglio guida
+    11. Moduli e messaggi
+    12. Tabelle (amministrazione)
+    13. Piè di pagina
+    14. Preferenze dell'utente (movimento ridotto, alto contrasto)
    ========================================================================== */
 
-/* --- 1. Font locali (licenza SIL OFL, file in fonts/) ----------------------- */
-@font-face {
-  font-family: "Chakra Petch";
-  src: url("../fonts/chakra-petch-latin-600-normal.woff2") format("woff2");
-  font-weight: 600;
-  font-display: swap;
-}
-@font-face {
-  font-family: "Chakra Petch";
-  src: url("../fonts/chakra-petch-latin-700-normal.woff2") format("woff2");
-  font-weight: 700;
-  font-display: swap;
-}
-@font-face {
-  font-family: "Inter";
-  src: url("../fonts/inter-latin-400-normal.woff2") format("woff2");
-  font-weight: 400;
-  font-display: swap;
-}
-@font-face {
-  font-family: "Inter";
-  src: url("../fonts/inter-latin-600-normal.woff2") format("woff2");
-  font-weight: 600;
-  font-display: swap;
-}
 
-/* --- 2. Variabili ------------------------------------------------------------ */
+/* --- 1. Variabili -------------------------------------------------------------
+   Le variabili (custom properties) raccolgono in un solo punto colori e font:
+   per cambiare un colore in tutto il sito basta modificarlo qui.
+   Accanto a ogni colore di testo c'è il rapporto di contrasto sullo sfondo:
+   WCAG chiede almeno 4.5:1 per il testo normale e 3:1 per bordi e focus. */
 :root {
-  --sfondo: #0b0f1a;        /* pagina */
-  --sfondo-2: #0e1322;      /* piè di pagina */
-  --pannello: #131a2b;      /* card e riquadri */
-  --pannello-2: #1a2338;    /* elementi dentro le card */
-  --linea: #232c43;         /* bordi decorativi */
-  --linea-forte: #5b6683;   /* bordi dei campi (3:1) */
-  --testo: #eef0f5;         /* 16.8:1 sullo sfondo */
-  --tenue: #a7b0c4;         /* testo secondario (8.8:1) */
-  --oro: #f2b53a;           /* accento (10.4:1) */
-  --su-oro: #171005;        /* testo sopra l'oro (10.3:1) */
-  --visitato: #c9a8ff;
+  /* sfondi */
+  --sfondo: #0b0f1a;        /* pagina                                  */
+  --sfondo-2: #0e1322;      /* piè di pagina                           */
+  --pannello: #131a2b;      /* card e riquadri                         */
+  --pannello-2: #1a2338;    /* elementi dentro le card                 */
+
+  /* bordi */
+  --linea: #232c43;         /* bordi solo decorativi                   */
+  --linea-forte: #68738f;   /* bordi dei campi dei moduli (almeno 3.3:1) */
+
+  /* testo */
+  --testo: #eef0f5;         /* testo principale (16.8:1)               */
+  --tenue: #a7b0c4;         /* testo secondario (8.8:1)                */
+  --chiaro: #c3cada;        /* voci di menu e paragrafi lunghi (11:1)  */
+  --oro: #f2b53a;           /* colore d'accento (10.4:1)               */
+  --su-oro: #171005;        /* testo scritto sopra l'oro (10.3:1)      */
+  --visitato: #c9a8ff;      /* link già visitati                       */
   --errore: #ff8f85;
   --successo: #72d69b;
 
-  --titoli: "Chakra Petch", "Trebuchet MS", Verdana, sans-serif;
-  --testo-font: "Inter", "Segoe UI", Verdana, sans-serif;
+  /* Font: nessun file da scaricare. Si usano font già installati nei
+     sistemi operativi, con un elenco di alternative chiuso dalla famiglia
+     generica (slide CSS n. 37: "è buona norma fornire un elenco di font e
+     non uno solo"). Sono font semplici, non decorativi:
+     - Verdana per il testo: altezza della x elevata, lettere ben distinte
+       (I, l, 1 e O, 0), pensato per lo schermo (slide accessibilità n. 44);
+     - Georgia per i titoli: serif leggibile anche a schermo. */
+  --font-testo: Verdana, Geneva, Tahoma, sans-serif;
+  --font-titoli: Georgia, "Times New Roman", Times, serif;
 
+  /* misure ricorrenti */
   --raggio: 0.75rem;
   --raggio-piccolo: 0.4rem;
-  --larghezza: 80rem;
-  --spazio: 1rem;
+  --larghezza: 80rem;       /* larghezza massima del contenuto          */
+  --spazio: 1rem;           /* margine laterale su cellulare            */
 }
 
-/* --- 3. Base ----------------------------------------------------------------- */
+
+/* --- 2. Base ------------------------------------------------------------------ */
+
+/* box-sizing: border-box fa sì che padding e bordo siano compresi nella
+   larghezza dichiarata: i calcoli del layout diventano più semplici. */
 *, *::before, *::after { box-sizing: border-box; }
 
 html {
-  font-size: 100%;
-  scroll-padding-top: 1rem;     /* il focus non finisce sotto i bordi (2.4.11) */
+  font-size: 100%;           /* rispetta la dimensione scelta dall'utente nel browser */
+  scroll-padding-top: 1rem;  /* l'elemento con il focus non finisce attaccato al bordo (WCAG 2.4.11) */
 }
 
+/* Il body è una griglia a tre righe: intestazione, contenuto, piè di pagina.
+   La riga centrale (1fr) si allunga, così il footer resta in fondo anche
+   nelle pagine corte. minmax(0, 1fr) impedisce che un elemento troppo largo
+   allarghi la pagina e crei lo scorrimento orizzontale. */
 body {
   margin: 0;
   min-height: 100vh;
   display: grid;
   grid-template-columns: minmax(0, 1fr);
-  grid-template-rows: auto 1fr auto;    /* header, contenuto, footer in fondo */
+  grid-template-rows: auto 1fr auto;
   color: var(--testo);
-  font-family: var(--testo-font);
+  font-family: var(--font-testo);
   font-size: 1rem;
-  line-height: 1.6;
-  /* bagliore dorato + griglia sottile: solo sfondi CSS, nessuna immagine */
-  background-color: var(--sfondo);
-  background-image:
-    radial-gradient(ellipse 40rem 26rem at 38% 8rem, rgba(242, 181, 58, 0.10), transparent 70%),
-    linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
-  background-size: auto, 4rem 4rem, 4rem 4rem;
-  background-repeat: no-repeat, repeat, repeat;
+  line-height: 1.6;          /* interlinea di almeno 1.5 (WCAG 1.4.12) */
+
+  /* Sfondo: colore pieno + un'immagine (images/sfondo.webp, 1920x1200,
+     11 KB) con la griglia sottile e il bagliore dorato già disegnati.
+     L'immagine è centrata in alto e non si ripete: verso il basso sfuma
+     esattamente nel colore --sfondo, quindi non si vede dove finisce.
+     È decorativa, per questo sta nel CSS e non in un <img> nell'HTML. */
+  background: var(--sfondo) url("../images/sfondo.webp") no-repeat center top;
 }
 
+/* Titoli: dimensioni in rem (relative alla dimensione del browser),
+   così si ingrandiscono insieme al testo quando l'utente fa zoom. */
 h1, h2, h3 {
-  font-family: var(--titoli);
-  font-weight: 700;
-  line-height: 1.15;
+  font-family: var(--font-titoli);
+  font-weight: bold;
+  line-height: 1.2;
   margin: 0 0 0.75rem;
 }
-h1 { font-size: 2.1rem; }
+h1 { font-size: 2rem; }
 h2 { font-size: 1.4rem; margin-top: 2rem; }
 h3 { font-size: 1.15rem; }
 
+/* Righe di testo non più lunghe di circa 70 caratteri: più facili da leggere. */
 p, li { max-width: 70ch; }
+
+/* Le immagini non escono mai dal loro contenitore. */
 img { max-width: 100%; height: auto; }
 
-/* link: sottolineati nel testo, colore diverso se visitati */
+/* Link: sottolineati, così non si distinguono solo per il colore
+   (WCAG 1.4.1). I link già visitati hanno un colore diverso. */
 a { color: var(--oro); text-underline-offset: 0.18em; }
 a:visited { color: var(--visitato); }
 a:hover { text-decoration-thickness: 0.15em; }
 
-/* --- 4. Focus e accessibilità ------------------------------------------------ */
+
+/* --- 3. Accessibilità ---------------------------------------------------------- */
+
+/* Focus visibile: quando si naviga con la tastiera, l'elemento attivo ha un
+   contorno oro di 3px (contrasto 10:1 sullo sfondo). :focus-visible lo
+   mostra con la tastiera ma non al clic del mouse. (WCAG 2.4.7) */
 :focus-visible {
   outline: 3px solid var(--oro);
   outline-offset: 3px;
   border-radius: 2px;
 }
-main:focus { outline: none; }      /* main riceve il focus solo dal link "salta" */
 
+/* <main> riceve il focus solo dal link "Salta al contenuto" (tabindex="-1"):
+   lì il contorno non serve. */
+main:focus { outline: none; }
+
+/* Link "Salta al contenuto": è il primo elemento raggiungibile con Tab.
+   Sta fuori dallo schermo (top negativo) e compare quando riceve il focus.
+   Non si usa display: none, altrimenti nessuno potrebbe raggiungerlo. (WCAG 2.4.1) */
 .skip-link {
   position: absolute;
   left: 0.5rem;
@@ -119,11 +159,13 @@ main:focus { outline: none; }      /* main riceve il focus solo dal link "salta"
   padding: 0.6rem 1rem;
   background: var(--oro);
   color: var(--su-oro);
-  font-weight: 600;
+  font-weight: bold;
   border-radius: var(--raggio-piccolo);
 }
 .skip-link:focus { top: 0.5rem; }
 
+/* Testo nascosto alla vista ma letto dagli screen reader
+   (es. "Leggi<span> la guida X</span>"). */
 .visually-hidden {
   position: absolute;
   width: 1px;
@@ -133,7 +175,12 @@ main:focus { outline: none; }      /* main riceve il focus solo dal link "salta"
   white-space: nowrap;
 }
 
-/* --- 5. Pulsanti e link-pulsante ---------------------------------------------- */
+
+/* --- 4. Pulsanti ed etichette --------------------------------------------------- */
+
+/* Pulsanti veri (<button>) e link che sembrano pulsanti (.btn, .btn-outline)
+   hanno lo stesso aspetto. Altezza minima 2.75rem (44px): bersaglio comodo
+   anche col dito (WCAG 2.5.8 chiede almeno 24px). */
 button,
 .btn,
 .btn-outline {
@@ -142,27 +189,36 @@ button,
   justify-content: center;
   min-height: 2.75rem;
   padding: 0.55rem 1.25rem;
-  font: 600 1rem/1.2 var(--testo-font);
+  font-family: var(--font-testo);
+  font-size: 1rem;
+  font-weight: bold;
+  line-height: 1.2;
   text-decoration: none;
   border: 2px solid var(--oro);
   border-radius: var(--raggio-piccolo);
   cursor: pointer;
   transition: background-color 0.15s ease, color 0.15s ease;
 }
+
+/* pulsante pieno: sfondo oro e testo scuro */
 button, .btn, .btn:visited {
   background: var(--oro);
   color: var(--su-oro);
 }
 button:hover, .btn:hover { background: #ffd27a; border-color: #ffd27a; }
 
+/* pulsante "vuoto": solo il bordo oro */
 .btn-outline, .btn-outline:visited {
   background: transparent;
   color: var(--oro);
 }
 .btn-outline:hover { background: var(--oro); color: var(--su-oro); }
 
-/* azioni distruttive (elimina, sospendi): stile diverso e testo esplicito.
-   Selettori di attributo sul form, come visto nelle slide. */
+/* Azioni distruttive (elimina, sospendi): colore diverso, ma il testo del
+   pulsante dice comunque cosa fa. Si selezionano con i SELETTORI DI
+   ATTRIBUTO sul form, senza aggiungere classi nel PHP:
+   - form[action="..."]  form che invia a una certa pagina
+   - :has(...)           form che contiene un campo action="delete..." */
 form[action="delete_guide.php"] button,
 form[action="admin_users.php"] button,
 form:has(input[name="action"][value^="delete"]) button {
@@ -177,12 +233,12 @@ form:has(input[name="action"][value^="delete"]) button:hover {
   color: var(--su-oro);
 }
 
-/* etichette piccole (ruolo, campione) */
+/* Etichette piccole: ruolo (oro) e nome del campione (scura). */
 .tag {
   display: inline-block;
   padding: 0.1rem 0.45rem;
   font-size: 0.75rem;
-  font-weight: 600;
+  font-weight: bold;
   line-height: 1.5;
   border-radius: 0.25rem;
   background: var(--sfondo);
@@ -195,7 +251,12 @@ form:has(input[name="action"][value^="delete"]) button:hover {
   letter-spacing: 0.05em;
 }
 
-/* --- 6. Intestazione ----------------------------------------------------------- */
+
+/* --- 5. Intestazione e menu ----------------------------------------------------
+   Su cellulare logo, menu e area utente stanno uno sotto l'altro
+   (grid-template-areas su una sola colonna). In desktop.css le stesse aree
+   vengono messe su una riga. L'ordine visivo è sempre quello del codice HTML,
+   così chi usa Tab non salta da una parte all'altra. */
 .site-header {
   background: rgba(11, 15, 26, 0.92);
   border-bottom: 1px solid var(--linea);
@@ -207,6 +268,7 @@ form:has(input[name="action"][value^="delete"]) button:hover {
     "brand"
     "nav"
     "user";
+  justify-items: center;          /* cellulare: logo e menu al centro */
   gap: 0.5rem;
   max-width: var(--larghezza);
   margin: 0 auto;
@@ -216,16 +278,17 @@ form:has(input[name="action"][value^="delete"]) button:hover {
 .main-nav  { grid-area: nav; }
 .user-nav  { grid-area: user; }
 
+/* logo: icona + "RIFT ACADEMY", con "Academy" in oro */
 .brand,
 .brand-text {
   display: inline-flex;
   align-items: center;
   gap: 0.6rem;
-  font-family: var(--titoli);
-  font-size: 1.4rem;
-  font-weight: 700;
+  font-family: var(--font-titoli);
+  font-size: 1.35rem;
+  font-weight: bold;
   text-transform: uppercase;
-  letter-spacing: 0.02em;
+  letter-spacing: 0.04em;
   color: var(--testo);
   text-decoration: none;
 }
@@ -233,9 +296,11 @@ form:has(input[name="action"][value^="delete"]) button:hover {
 .brand em, .brand-text em { font-style: normal; color: var(--oro); }
 .brand img { width: 2rem; height: 2rem; }
 
+/* liste del menu: in riga, e vanno a capo se lo spazio non basta (flex-wrap) */
 .site-header ul {
   display: flex;
   flex-wrap: wrap;
+  justify-content: center;         /* cellulare: voci centrate */
   align-items: center;
   gap: 0.25rem 1.5rem;
   margin: 0;
@@ -246,17 +311,21 @@ form:has(input[name="action"][value^="delete"]) button:hover {
 .user-nav a:not(.btn) {
   display: inline-block;
   padding: 0.35rem 0;
-  min-height: 1.5rem;              /* target >= 24px (WCAG 2.5.8) */
-  color: #c3cada;
-  font-weight: 600;
+  min-height: 1.5rem;              /* bersaglio di almeno 24px (WCAG 2.5.8) */
+  color: var(--chiaro);
+  font-weight: bold;
   text-decoration: none;
   border-bottom: 2px solid transparent;
 }
 .main-nav a:hover,
 .user-nav a:not(.btn):hover { color: var(--testo); border-bottom-color: var(--oro); }
-/* pagina corrente: testo bianco e linea dorata, non solo il colore */
+
+/* Pagina corrente: il PHP aggiunge aria-current="page" alla voce giusta.
+   Lo screen reader la annuncia, a schermo diventa bianca e sottolineata
+   (non solo un cambio di colore). */
 .main-nav a[aria-current="page"] { color: var(--testo); border-bottom-color: var(--oro); }
 
+/* Pulsante "Esci": è un <button> dentro un form POST (il logout cambia dati) */
 .user-nav form { margin: 0; }
 .user-nav button {
   min-height: 2.5rem;
@@ -267,7 +336,10 @@ form:has(input[name="action"][value^="delete"]) button:hover {
 .user-nav button:hover { border-color: var(--oro); background: transparent; }
 .user-nav .btn { min-height: 2.5rem; }
 
-/* --- 7. Contenuto ------------------------------------------------------------- */
+
+/* --- 6. Contenuto e riquadri comuni ------------------------------------------- */
+
+/* Il contenuto è centrato e non supera 80rem di larghezza. */
 main {
   width: 100%;
   max-width: var(--larghezza);
@@ -278,6 +350,9 @@ section { margin-bottom: 1.5rem; }
 
 .meta { color: var(--tenue); font-size: 0.9rem; }
 
+/* Briciole di pane: una lista ordinata messa in riga con flex.
+   Il separatore "/" è generato dal CSS; con la sintassi content: "/" / ""
+   il testo alternativo è vuoto e lo screen reader non lo legge. */
 .breadcrumb ol {
   display: flex;
   flex-wrap: wrap;
@@ -290,22 +365,28 @@ section { margin-bottom: 1.5rem; }
 }
 .breadcrumb li + li::before {
   content: "/";
-  content: "/" / "";            /* testo alternativo vuoto: non viene letto */
+  content: "/" / "";
   margin-right: 0.35rem;
 }
 
-/* riquadro generico */
+/* Riquadri con lo stesso aspetto, raggruppati in una sola regola. */
 main > form[data-validate],
 .search-page-form,
-.guide-side > section {
+.guide-side > section,
+.cta,
+.role-grid a,
+.guide-item,
+.champion-card {
   background: var(--pannello);
   border: 1px solid var(--linea);
   border-radius: var(--raggio);
 }
 
-/* --- 8. Home ---------------------------------------------------------------------
-   Mobile: tutto in colonna. Desktop: presentazione, ruoli e invito a sinistra,
-   ultime guide a destra. L'ordine visivo è lo stesso del codice. */
+
+/* --- 7. Home ---------------------------------------------------------------------
+   La home usa CSS Grid con le AREE NOMINATE (grid-template-areas):
+   su cellulare le quattro parti sono una sotto l'altra, in desktop.css
+   diventano due colonne (contenuto a sinistra, ultime guide a destra). */
 .home {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
@@ -316,41 +397,49 @@ main > form[data-validate],
     "ultime";
   gap: 1.5rem 3rem;
 }
-.hero   { grid-area: hero; }
+.hero   { grid-area: hero; text-align: center; }   /* cellulare: centrata */
 .roles  { grid-area: ruoli; margin: 0; }
 .cta    { grid-area: invito; }
 .latest { grid-area: ultime; }
 
+/* etichetta a pillola sopra il titolo */
 .eyebrow {
   display: inline-block;
   margin: 0 0 1.25rem;
   padding: 0.3rem 0.8rem;
   font-size: 0.75rem;
-  font-weight: 600;
-  letter-spacing: 0.12em;
+  font-weight: bold;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--oro);
   border: 1px solid var(--oro);
   border-radius: 999px;
 }
 .hero h1 {
-  font-size: 2.4rem;
-  line-height: 1.08;
+  font-size: 2.2rem;
+  line-height: 1.1;
   max-width: 15em;
+  margin-left: auto;               /* margini automatici: il blocco resta al centro */
+  margin-right: auto;
 }
-.highlight { color: var(--oro); }
+.highlight { color: var(--oro); }    /* "funzionano davvero" in oro */
 .lead {
-  margin: 0 0 1.75rem;
-  font-size: 1.1rem;
-  color: #c3cada;
+  margin: 0 auto 1.75rem;
+  font-size: 1.05rem;
+  color: var(--chiaro);
 }
 
-/* ricerca grande: etichetta visibile sopra, campo con lente e pulsante */
+/* Ricerca grande: griglia a due colonne (campo + pulsante).
+   L'etichetta occupa tutta la prima riga (grid-column: 1 / -1) ed è
+   visibile: un placeholder non basta come etichetta (WCAG 3.3.2).
+   La lente è un'immagine di sfondo: decorativa, quindi non letta. */
 .hero-search {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
   gap: 0.4rem 0.75rem;
   max-width: 40rem;
+  margin: 0 auto;
+  text-align: left;                /* etichetta e campo allineati tra loro */
 }
 .hero-search label {
   grid-column: 1 / -1;
@@ -359,14 +448,17 @@ main > form[data-validate],
 }
 .hero-search input[type="search"] {
   min-height: 3.25rem;
+  max-width: none;
   padding-left: 2.75rem;
   background: var(--pannello) url("../images/icons/search.svg") no-repeat 0.9rem center / 1.25rem;
-  max-width: none;
 }
-.hero-search button { min-height: 3.25rem; padding: 0 1.75rem; }
+.hero-search button { min-height: 3.25rem; padding: 0 1.5rem; }
 
-/* riquadri dei ruoli */
-.roles h2 { margin: 1rem 0 1rem; }
+/* Riquadri "Sfoglia per ruolo".
+   repeat(auto-fill, minmax(7.5rem, 1fr)): il browser mette quante colonne
+   da almeno 7.5rem ci stanno. Su cellulare 2, su desktop 5, senza media query.
+   min(7.5rem, 100%) evita lo scorrimento orizzontale sugli schermi strettissimi. */
+.roles h2 { margin: 1rem 0; text-align: center; }
 .role-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(min(7.5rem, 100%), 1fr));
@@ -380,29 +472,30 @@ main > form[data-validate],
   justify-items: center;
   gap: 0.5rem;
   padding: 1.1rem 0.5rem;
-  background: var(--pannello);
-  border: 1px solid var(--linea);
-  border-radius: var(--raggio);
   color: var(--testo);
-  font-family: var(--titoli);
+  font-family: var(--font-titoli);
   font-size: 1.1rem;
-  font-weight: 600;
+  font-weight: bold;
   text-decoration: none;
   transition: border-color 0.15s ease, transform 0.15s ease;
 }
+.role-grid a:visited { color: var(--testo); }
 .role-grid a:hover { border-color: var(--oro); transform: translateY(-2px); }
 .role-grid img { width: 1.75rem; height: 1.75rem; }
+/* Su cellulare i riquadri sono 2 per riga: il quinto (Support) resterebbe
+   da solo a sinistra, quindi occupa tutta l'ultima riga ed è centrato.
+   :last-child:nth-child(odd) = ultimo elemento in posizione dispari. */
+.role-grid li:last-child:nth-child(odd) { grid-column: 1 / -1; }
 
-/* invito a scrivere una guida */
+/* Riquadro "Conosci un campione a memoria?": icona | testo, pulsante sotto.
+   In desktop.css il pulsante passa a destra, sulla stessa riga. */
 .cta {
   display: grid;
-  grid-template-columns: auto minmax(0, 1fr);
-  align-items: center;
+  grid-template-columns: minmax(0, 1fr);
+  justify-items: center;           /* cellulare: tutto in colonna e al centro */
+  text-align: center;
   gap: 1rem 1.25rem;
   padding: 1.25rem;
-  background: var(--pannello);
-  border: 1px solid var(--linea);
-  border-radius: var(--raggio);
 }
 .cta > img {
   width: 3rem;
@@ -412,10 +505,10 @@ main > form[data-validate],
   border-radius: var(--raggio-piccolo);
 }
 .cta h2 { margin: 0 0 0.2rem; font-size: 1.2rem; }
-.cta p { margin: 0; color: #c3cada; }
-.cta .btn-outline { grid-column: 1 / -1; justify-self: start; }
+.cta p { margin: 0; color: var(--chiaro); }
+.cta p { margin-left: auto; margin-right: auto; }
 
-/* colonna "Ultime guide" */
+/* Colonna "Ultime guide" */
 .latest {
   padding: 1.25rem;
   background: rgba(19, 26, 43, 0.85);
@@ -424,21 +517,24 @@ main > form[data-validate],
 }
 .latest-head {
   display: flex;
-  justify-content: space-between;
+  flex-wrap: wrap;
+  justify-content: center;         /* cellulare: titolo e link al centro */
   align-items: baseline;
   gap: 1rem;
   margin-bottom: 1rem;
 }
 .latest-head h2 { margin: 0; }
-.latest-head a { font-weight: 600; font-size: 0.9rem; text-decoration: none; }
+.latest-head a { font-weight: bold; font-size: 0.9rem; text-decoration: none; }
 .latest-head a:hover { text-decoration: underline; }
+
+/* freccia "→" decorativa dopo "Vedi tutte" e "Leggi": testo alternativo vuoto */
 .latest-head a::after,
 .guide-card-foot a::after {
   content: " →";
-  content: " →" / "";           /* freccia decorativa, non letta */
+  content: " →" / "";
 }
 
-/* card di una guida */
+/* Card di una guida: banner con immagine del campione, poi testo. */
 .guide-card {
   margin-bottom: 1rem;
   background: var(--pannello-2);
@@ -447,6 +543,9 @@ main > form[data-validate],
   overflow: hidden;
 }
 .guide-card:last-child { margin-bottom: 0; }
+
+/* Il banner è un contenitore "position: relative": le etichette dentro
+   sono "position: absolute" e si posizionano rispetto a lui. */
 .guide-card-banner {
   position: relative;
   height: 5.5rem;
@@ -455,7 +554,7 @@ main > form[data-validate],
 .guide-card-banner img {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: cover;              /* riempie il riquadro senza deformare l'immagine */
   object-position: center 22%;
 }
 /* velo scuro sopra l'immagine: le etichette restano leggibili */
@@ -469,11 +568,13 @@ main > form[data-validate],
   position: absolute;
   left: 1rem;
   bottom: 0.75rem;
-  z-index: 1;
+  z-index: 1;                     /* sopra il velo */
   margin: 0;
 }
 .guide-card-body { padding: 1rem; }
 .guide-card h3 { margin-bottom: 0.4rem; }
+
+/* estratto della strategia: al massimo 3 righe, poi "..." */
 .excerpt {
   margin: 0 0 0.9rem;
   font-size: 0.9rem;
@@ -493,10 +594,13 @@ main > form[data-validate],
   color: var(--tenue);
 }
 .guide-card-foot strong { color: var(--testo); }
-.guide-card-foot a { font-weight: 600; text-decoration: none; }
+.guide-card-foot a { font-weight: bold; text-decoration: none; }
 .guide-card-foot a:hover { text-decoration: underline; }
 
-/* --- 9. Elenco guide (pagina Guide / ricerca) ----------------------------------- */
+
+/* --- 8. Elenco guide (pagina Guide / ricerca) ------------------------------------- */
+
+/* modulo di ricerca: i campi si affiancano se c'è spazio (auto-fit) */
 .search-page-form {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(min(14rem, 100%), 1fr));
@@ -507,6 +611,7 @@ main > form[data-validate],
 }
 .search-page-form p:last-child { margin-bottom: 1rem; }
 
+/* elenco delle guide: una colonna su cellulare, due o più su schermi larghi */
 .guide-list {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(min(22rem, 100%), 1fr));
@@ -515,6 +620,7 @@ main > form[data-validate],
   padding: 0;
   list-style: none;
 }
+/* ogni guida: miniatura quadrata a sinistra, testo a destra */
 .guide-item {
   display: grid;
   grid-template-columns: 4rem minmax(0, 1fr);
@@ -522,9 +628,6 @@ main > form[data-validate],
   gap: 1rem;
   max-width: none;
   padding: 0.75rem;
-  background: var(--pannello);
-  border: 1px solid var(--linea);
-  border-radius: var(--raggio);
 }
 .guide-item img {
   width: 4rem;
@@ -533,10 +636,12 @@ main > form[data-validate],
   object-position: center 20%;
   border-radius: var(--raggio-piccolo);
 }
-.guide-item a { font-family: var(--titoli); font-size: 1.1rem; font-weight: 600; }
+.guide-item a { font-family: var(--font-titoli); font-size: 1.1rem; font-weight: bold; }
 .guide-item p { margin: 0.2rem 0 0; font-size: 0.85rem; color: var(--tenue); }
 
-/* --- 10. Campioni ------------------------------------------------------------------ */
+
+/* --- 9. Campioni ----------------------------------------------------------------- */
+
 .card-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(min(11rem, 100%), 1fr));
@@ -545,11 +650,9 @@ main > form[data-validate],
 .champion-card {
   display: grid;
   grid-template-rows: auto auto 1fr auto;
-  background: var(--pannello);
-  border: 1px solid var(--linea);
-  border-radius: var(--raggio);
   overflow: hidden;
 }
+/* ritratto verticale 3:4, ritagliato dall'alto */
 .champion-card img {
   width: 100%;
   height: auto;
@@ -562,7 +665,7 @@ main > form[data-validate],
 .champion-card p { margin: 0 0.9rem 0.75rem; font-size: 0.875rem; color: var(--tenue); }
 .champion-card p:last-child { color: var(--testo); }
 
-/* filtro dei campioni */
+/* filtro per ruolo: select e pulsante affiancati, etichetta sopra */
 form[action="champions.php"] {
   display: grid;
   grid-template-columns: minmax(0, 18rem) auto;
@@ -572,7 +675,10 @@ form[action="champions.php"] {
 }
 form[action="champions.php"] label { grid-column: 1 / -1; margin: 0; }
 
-/* --- 11. Dettaglio guida ------------------------------------------------------------ */
+
+/* --- 10. Dettaglio guida -------------------------------------------------------------
+   Su cellulare una colonna. In desktop.css: contenuto a sinistra,
+   colonna laterale (voto e azioni) a destra. */
 .guide-layout {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
@@ -581,6 +687,7 @@ form[action="champions.php"] label { grid-column: 1 / -1; margin: 0; }
 .guide-side > section { padding: 0.25rem 1.25rem 1rem; margin-top: 1.5rem; }
 .guide-side h2 { font-size: 1.2rem; margin-top: 1rem; }
 
+/* oggetti e rune: "tessere" in griglia */
 section[aria-labelledby="build"] ul {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(min(12rem, 100%), 1fr));
@@ -600,6 +707,7 @@ section[aria-labelledby="build"] li {
 }
 section[aria-labelledby="build"] img { width: 2rem; height: 2rem; border-radius: 0.25rem; }
 
+/* commenti: ogni commento è un riquadro con una linea oro a sinistra */
 section[aria-labelledby="commenti"] > ul { padding: 0; list-style: none; }
 section[aria-labelledby="commenti"] > ul > li {
   max-width: none;
@@ -612,7 +720,8 @@ section[aria-labelledby="commenti"] > ul > li {
 }
 section[aria-labelledby="commenti"] li p { margin: 0.25rem 0; }
 
-/* "Segnala": modulo chiuso in un <details> nativo (accessibile da tastiera) */
+/* "Segnala": il modulo è chiuso in un <details> nativo dell'HTML.
+   Si apre con clic, Invio o Spazio, senza JavaScript. */
 details.report { margin: 0.5rem 0; }
 details.report summary {
   display: inline-block;
@@ -623,13 +732,17 @@ details.report summary {
   font-size: 0.9rem;
 }
 
-/* --- 12. Moduli ------------------------------------------------------------------------ */
+
+/* --- 11. Moduli e messaggi ------------------------------------------------------------ */
+
 form { margin: 0 0 1rem; }
 form p { margin: 0 0 1rem; }
 
-label { display: block; font-weight: 600; margin-bottom: 0.35rem; }
-label.inline-label { display: inline; font-weight: 400; }
+/* etichetta sopra il campo, sempre visibile */
+label { display: block; font-weight: bold; margin-bottom: 0.35rem; }
+label.inline-label { display: inline; font-weight: normal; }   /* accanto alle caselle */
 
+/* i campi ereditano il font della pagina (di default i browser usano il loro) */
 input, select, textarea { font: inherit; }
 
 input[type="text"], input[type="email"], input[type="password"],
@@ -639,7 +752,7 @@ input[type="search"], select, textarea {
   padding: 0.6rem 0.75rem;
   background: var(--sfondo);
   color: var(--testo);
-  border: 2px solid var(--linea-forte);
+  border: 2px solid var(--linea-forte);   /* contrasto 3:1: il campo si vede (WCAG 1.4.11) */
   border-radius: var(--raggio-piccolo);
 }
 input:hover, select:hover, textarea:hover { border-color: var(--tenue); }
@@ -648,11 +761,12 @@ input[type="checkbox"] {
   width: 1.25rem;
   height: 1.25rem;
   vertical-align: -0.2em;
-  accent-color: var(--oro);
+  accent-color: var(--oro);       /* colore della spunta */
 }
 
 main > form[data-validate] { max-width: 40rem; padding: 1.5rem; }
 
+/* caselle di oggetti, rune e ruoli: in colonne */
 fieldset {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(min(10rem, 100%), 1fr));
@@ -663,11 +777,14 @@ fieldset {
   border-radius: var(--raggio-piccolo);
 }
 fieldset p { margin: 0.25rem 0; }
-legend { padding: 0 0.4rem; font-weight: 600; }
+legend { padding: 0 0.4rem; font-weight: bold; }
 
-/* messaggi */
-.field-error { color: var(--errore); font-weight: 600; margin: 0.3rem 0 0; }
+/* Errori: testo colorato, ma il messaggio spiega sempre cosa correggere
+   (l'errore non è indicato dal solo colore, WCAG 1.4.1 e 3.3.1). */
+.field-error { color: var(--errore); font-weight: bold; margin: 0.3rem 0 0; }
 [aria-invalid="true"] { border-color: var(--errore); }
+
+/* riquadri di errore e di conferma: barra colorata a sinistra */
 .form-errors,
 .flash {
   margin-bottom: 1.5rem;
@@ -680,17 +797,19 @@ legend { padding: 0 0.4rem; font-weight: 600; }
 .form-errors { border-left-color: var(--errore); color: var(--errore); }
 .flash { border-left-color: var(--successo); }
 
-/* --- 13. Tabelle (area amministrazione) ------------------------------------------------ */
+
+/* --- 12. Tabelle (amministrazione) ------------------------------------------------- */
+
 table {
   width: 100%;
-  border-collapse: collapse;
+  border-collapse: collapse;      /* bordi delle celle uniti */
   background: var(--pannello);
   font-size: 0.9rem;
 }
 caption {
   text-align: left;
-  font-family: var(--titoli);
-  font-weight: 700;
+  font-family: var(--font-titoli);
+  font-weight: bold;
   padding: 0.5rem 0;
 }
 th, td {
@@ -698,7 +817,7 @@ th, td {
   border: 1px solid var(--linea);
   text-align: left;
   vertical-align: top;
-  overflow-wrap: anywhere;
+  overflow-wrap: anywhere;        /* le parole lunghe (email) vanno a capo */
 }
 thead th { background: var(--pannello-2); color: var(--oro); }
 tbody tr:nth-child(even) { background: var(--sfondo-2); }   /* righe alternate */
@@ -706,7 +825,9 @@ td form { display: inline-block; margin: 0 0.25rem 0.25rem 0; }
 
 section > ul > li form { margin: 0.4rem 0 0.75rem; }
 
-/* --- 14. Piè di pagina ------------------------------------------------------------------- */
+
+/* --- 13. Piè di pagina ------------------------------------------------------------- */
+
 .site-footer {
   background: var(--sfondo-2);
   border-top: 1px solid var(--linea);
@@ -718,29 +839,33 @@ section > ul > li form { margin: 0.4rem 0 0.75rem; }
   margin: 0 auto;
   padding: 2.5rem var(--spazio);
 }
+/* colonne del footer: quante ne stanno, ognuna larga almeno 10rem */
 .footer-inner {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(min(10rem, 100%), 1fr));
   gap: 2rem;
+  text-align: center;              /* cellulare: colonne centrate */
 }
+.footer-brand p { margin-left: auto; margin-right: auto; }
 .footer-brand p { margin: 0 0 0.5rem; color: var(--tenue); }
-.footer-brand .brand-text { color: var(--testo); font-size: 1.25rem; }
+.footer-brand .brand-text { color: var(--testo); font-size: 1.2rem; }
 .footer-title {
   margin: 0 0 0.75rem;
   font-size: 0.8rem;
-  font-weight: 600;
-  letter-spacing: 0.12em;
+  font-weight: bold;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--oro);
 }
 .footer-nav ul { margin: 0; padding: 0; list-style: none; }
 .footer-nav li { margin-bottom: 0.4rem; }
-.footer-nav a { color: #c3cada; text-decoration: none; }
+.footer-nav a { color: var(--chiaro); text-decoration: none; }
 .footer-nav a:hover { color: var(--testo); text-decoration: underline; }
 .footer-bottom {
   display: flex;
   flex-wrap: wrap;
-  justify-content: space-between;
+  justify-content: center;         /* cellulare: righe centrate */
+  text-align: center;
   gap: 0.5rem 2rem;
   padding-top: 1.25rem;
   padding-bottom: 1.5rem;
@@ -750,48 +875,11 @@ section > ul > li form { margin: 0.4rem 0 0.75rem; }
 }
 .footer-bottom p { margin: 0; }
 
-/* --- 15. Schermi medi -------------------------------------------------------------------- */
-@media screen and (min-width: 48em) {
-  .header-inner {
-    grid-template-columns: auto 1fr auto;
-    grid-template-areas: "brand nav user";
-    align-items: center;
-    gap: 1rem 2.5rem;
-    padding: 0.9rem 2rem;
-  }
-  main { padding: 3rem 2rem 5rem; }
-  h1 { font-size: 2.5rem; }
-  .hero h1 { font-size: 3.25rem; }
 
-  .cta {
-    grid-template-columns: auto minmax(0, 1fr) auto;
-    padding: 1.5rem;
-  }
-  .cta .btn-outline { grid-column: auto; }
+/* --- 14. Preferenze dell'utente ------------------------------------------------------ */
 
-  .footer-inner { grid-template-columns: 2fr repeat(3, 1fr); padding: 3rem 2rem; }
-  .footer-bottom { padding-left: 2rem; padding-right: 2rem; }
-}
-
-/* --- 16. Schermi larghi ------------------------------------------------------------------ */
-@media screen and (min-width: 64em) {
-  .home {
-    grid-template-columns: minmax(0, 1fr) 25rem;
-    grid-template-areas:
-      "hero   ultime"
-      "ruoli  ultime"
-      "invito ultime";
-    align-items: start;
-  }
-  .hero h1 { font-size: 3.6rem; }
-
-  .guide-layout {
-    grid-template-columns: minmax(0, 1fr) 20rem;
-    align-items: start;
-  }
-}
-
-/* --- 17. Preferenze dell'utente ------------------------------------------------------------ */
+/* Chi ha attivato "riduci movimento" nel sistema operativo non vede
+   transizioni né spostamenti (WCAG 2.3.3). */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.01ms !important;
@@ -801,7 +889,8 @@ section > ul > li form { margin: 0.4rem 0 0.75rem; }
   }
 }
 
-/* alto contrasto di Windows: i decori spariscono, bordi e testo restano */
+/* Modalità ad alto contrasto di Windows: il sistema impone i suoi colori.
+   Si tolgono i decori di sfondo e si aggiungono bordi dove servono. */
 @media (forced-colors: active) {
   body { background-image: none; }
   .tag, .eyebrow, button, .btn, .btn-outline { border: 1px solid CanvasText; }

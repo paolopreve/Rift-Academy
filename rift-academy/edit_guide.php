@@ -128,21 +128,21 @@ foreach ($champions as $champion) {
 $role_options = '<option value="">Seleziona un ruolo</option>';
 foreach ($roles as $role) {
     $sel = ((int) $role['id'] === $role_id) ? ' selected="selected"' : '';
-    $role_options .= '<option value="' . e($role['id']) . '"' . $sel . '>' . e($role['name']) . '</option>';
+    $role_options .= '<option value="' . e($role['id']) . '" lang="en"' . $sel . '>' . e($role['name']) . '</option>';
 }
 
 $item_checkboxes = '';
 foreach ($items as $item) {
     $chk = in_array((int) $item['id'], $item_ids, true) ? ' checked="checked"' : '';
     $item_checkboxes .= '<p><input id="item_' . e($item['id']) . '" type="checkbox" name="items[]" value="' . e($item['id']) . '"' . $chk . ' /> '
-        . '<label class="inline-label" for="item_' . e($item['id']) . '">' . e($item['name']) . '</label></p>';
+        . '<label class="inline-label" for="item_' . e($item['id']) . '" lang="en">' . e($item['name']) . '</label></p>';
 }
 
 $rune_checkboxes = '';
 foreach ($runes as $rune) {
     $chk = in_array((int) $rune['id'], $rune_ids, true) ? ' checked="checked"' : '';
     $rune_checkboxes .= '<p><input id="rune_' . e($rune['id']) . '" type="checkbox" name="runes[]" value="' . e($rune['id']) . '"' . $chk . ' /> '
-        . '<label class="inline-label" for="rune_' . e($rune['id']) . '">' . e($rune['name']) . '</label></p>';
+        . '<label class="inline-label" for="rune_' . e($rune['id']) . '" lang="en">' . e($rune['name']) . '</label></p>';
 }
 
 render_page('templates/edit_guide.html', [

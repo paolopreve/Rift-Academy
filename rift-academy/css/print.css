@@ -1,11 +1,66 @@
-/* Stile di stampa: solo il contenuto, nero su bianco, caratteri con grazie. */
-.site-header, .skip-link, .site-footer, form, details.report, .cta, .roles, .guide-card-banner { display: none; }
-body { display: block; color: #000; background: #fff; font-family: Georgia, "Times New Roman", serif; font-size: 12pt; }
-h1, h2, h3, .highlight, a, .eyebrow { color: #000; }
-main { max-width: none; padding: 0; }
-.latest, .guide-card, .champion-card, .guide-item, .guide-side > section { background: #fff; color: #000; border: 1px solid #999; }
-.home, .guide-layout { display: block; }
-.guide-card, .champion-card, .guide-item { break-inside: avoid; }
-.excerpt, .guide-card-foot, .meta, .guide-item p { color: #333; }
-/* indirizzo dei link dopo il testo (solo nel contenuto) */
-main a::after { content: " (" attr(href) ")"; font-size: 0.85em; }
+/* ==========================================================================
+   RIFT ACADEMY - print.css
+   Foglio di stile per la STAMPA (link con media="print").
+   style.css e desktop.css hanno media="screen", quindi in stampa non
+   vengono applicati: questo file è completo da solo.
+   In stampa si usano unità assolute (pt, cm), adatte alla carta
+   ========================================================================== */
+
+/* margini del foglio */
+@page { margin: 2cm; }
+
+/* nero su bianco, font con grazie, più leggibile su carta */
+body {
+  margin: 0;
+  color: #000;
+  background: #fff;
+  font-family: Georgia, "Times New Roman", Times, serif;
+  font-size: 12pt;
+  line-height: 1.5;
+}
+
+/* si nasconde tutto ciò che su carta non serve: menu, moduli, pulsanti,
+   immagini decorative */
+.site-header,
+.skip-link,
+.site-footer,
+form,
+button,
+details.report,
+.cta,
+.roles,
+.guide-card-banner,
+.guide-item img,
+.visually-hidden { display: none; }
+
+h1 { font-size: 22pt; margin: 0 0 12pt; }
+h2 { font-size: 16pt; margin: 18pt 0 6pt; }
+h3 { font-size: 13pt; margin: 12pt 0 4pt; }
+.eyebrow, .meta, .excerpt, .guide-card-foot, .guide-item p { font-size: 10pt; color: #333; }
+
+/* le liste usate come griglie tornano liste semplici */
+ul { padding-left: 1.2em; }
+.guide-list, .role-grid { list-style: none; padding: 0; }
+
+/* riquadri: un bordo sottile e mai spezzati tra due pagine */
+.latest,
+.guide-card,
+.guide-item,
+.champion-card,
+section[aria-labelledby="commenti"] li {
+  border: 1px solid #999;
+  padding: 6pt 8pt;
+  margin-bottom: 8pt;
+  break-inside: avoid;
+}
+
+/* campioni: piccoli, in fila */
+.champion-card { display: inline-block; width: 30%; vertical-align: top; }
+.champion-card img { max-width: 100%; }
+
+table { border-collapse: collapse; width: 100%; }
+th, td { border: 1px solid #000; padding: 4pt; text-align: left; }
+
+/* link: su carta non si possono cliccare, quindi si stampa l'indirizzo */
+a { color: #000; text-decoration: underline; }
+main a::after { content: " (" attr(href) ")"; font-size: 9pt; }

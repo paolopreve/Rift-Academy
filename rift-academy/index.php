@@ -21,12 +21,12 @@ foreach ($latestGuides as $guide) {
     $latestGuidesHtml .= '<article class="guide-card">';
     // Immagine del campione solo decorativa: il nome è scritto subito sotto
     $latestGuidesHtml .= '<div class="guide-card-banner"><img src="' . e(img_small($guide['champion_image'])) . '" alt="" width="480" height="283" loading="lazy" decoding="async" />';
-    $latestGuidesHtml .= '<p class="tags"><span class="tag tag-role">' . e($guide['role_name']) . '</span> <span class="tag">' . e($guide['champion_name']) . '</span></p></div>';
+    $latestGuidesHtml .= '<p class="tags"><span class="tag tag-role" lang="en">' . e($guide['role_name']) . '</span> <span class="tag">' . e($guide['champion_name']) . '</span></p></div>';
     $latestGuidesHtml .= '<div class="guide-card-body">';
-    $latestGuidesHtml .= '<h3>' . e($guide['title']) . '</h3>';
-    $latestGuidesHtml .= '<p class="excerpt">' . e($guide['strategy_text']) . '</p>';
+    $latestGuidesHtml .= '<h3>' . en(e($guide['title'])) . '</h3>';
+    $latestGuidesHtml .= '<p class="excerpt">' . en(e($guide['strategy_text'])) . '</p>';
     $latestGuidesHtml .= '<p class="guide-card-foot"><span><strong>' . e($guide['author_name']) . '</strong> · ' . e(data_breve($guide['created_at'])) . '</span>';
-    $latestGuidesHtml .= ' <a href="guide_detail.php?id=' . e($guide['id']) . '">Leggi<span class="visually-hidden"> la guida ' . e($guide['title']) . '</span></a></p>';
+    $latestGuidesHtml .= ' <a href="guide_detail.php?id=' . e($guide['id']) . '">Leggi<span class="visually-hidden"> la guida ' . en(e($guide['title'])) . '</span></a></p>';
     $latestGuidesHtml .= '</div></article>';
 }
 if ($latestGuidesHtml === '') {
@@ -40,7 +40,7 @@ foreach ($roles as $role) {
     // Il file dell'icona ha il nome del ruolo in minuscolo (images/roles/mid.svg)
     $icon = 'images/roles/' . strtolower(preg_replace('/[^A-Za-z]/', '', $role['name'])) . '.svg';
     $roleLinksHtml .= '<li><a href="search.php?role=' . e($role['id']) . '"><img src="' . e($icon) . '" alt="" width="24" height="24" /> '
-        . e($role['name']) . '</a></li>';
+        . '<span lang="en">' . e($role['name']) . '</span></a></li>';
 }
 
 render_page('templates/index.html', [

@@ -1,0 +1,81 @@
+/* ==========================================================================
+   RIFT ACADEMY - desktop.css
+   Regole per TABLET e COMPUTER. Il file viene applicato solo dagli schermi
+   larghi almeno 48em (circa 768px), grazie al link in header.html:
+
+     <link rel="stylesheet" href="css/desktop.css"
+           media="screen and (min-width: 48em)" />
+
+   Qui si sovrascrivono solo le regole di style.css che cambiano sugli
+   schermi grandi: tutto il resto (colori, font, pulsanti...) è già in
+   style.css. Le misure sono in em, così il punto di passaggio segue lo zoom
+   del testo: con lo zoom al 200% anche un computer riceve il layout a una
+   colonna, più comodo da leggere (WCAG 1.4.10).
+
+   Indice
+     1. Tablet e computer (da 48em, circa 768px)
+     2. Schermi larghi (da 64em, circa 1024px)
+   ========================================================================== */
+
+
+/* --- 1. Tablet e computer (da 48em) ----------------------------------------------- */
+
+/* Intestazione: logo, menu e area utente sulla stessa riga.
+   Sono le stesse aree di style.css, disposte in tre colonne:
+   auto (larga quanto il logo) | 1fr (il menu prende lo spazio libero) | auto */
+.header-inner {
+  grid-template-columns: auto 1fr auto;
+  grid-template-areas: "brand nav user";
+  align-items: center;
+  gap: 1rem 2.5rem;
+  padding: 0.9rem 2rem;
+}
+
+/* più spazio intorno al contenuto e titoli più grandi */
+main { padding: 3rem 2rem 5rem; }
+h1 { font-size: 2.4rem; }
+.hero h1 { font-size: 3rem; }
+
+/* Riquadro "Scrivi una guida": icona | testo | pulsante su una riga */
+.cta {
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  padding: 1.5rem;
+}
+.cta .btn-outline { grid-column: auto; }
+
+/* Piè di pagina: colonna del logo più larga (2fr), poi le tre colonne di link */
+.footer-inner {
+  grid-template-columns: 2fr repeat(3, 1fr);
+  padding: 3rem 2rem;
+}
+.footer-bottom { padding-left: 2rem; padding-right: 2rem; }
+
+
+/* --- 2. Schermi larghi (da 64em) ----------------------------------------------------
+   Questa media query sta DENTRO desktop.css: si somma alla condizione del
+   link (min-width: 48em), quindi vale solo da 64em in su. */
+@media screen and (min-width: 64em) {
+
+  /* Home a due colonne con le aree nominate:
+       colonna sinistra (1fr)   -> presentazione, ruoli, invito
+       colonna destra (25rem)   -> ultime guide, alta quanto le tre righe
+     L'ordine nel codice HTML resta: presentazione, ruoli, invito, ultime guide. */
+  .home {
+    grid-template-columns: minmax(0, 1fr) 25rem;
+    /* le prime due righe alte quanto il contenuto, l'ultima prende lo
+       spazio che avanza: così le sezioni a sinistra restano vicine */
+    grid-template-rows: auto auto 1fr;
+    grid-template-areas:
+      "hero   ultime"
+      "ruoli  ultime"
+      "invito ultime";
+    align-items: start;
+  }
+  .hero h1 { font-size: 3.4rem; }
+
+  /* Dettaglio guida: contenuto a sinistra, voto e azioni a destra (20rem) */
+  .guide-layout {
+    grid-template-columns: minmax(0, 1fr) 20rem;
+    align-items: start;
+  }
+}

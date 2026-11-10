@@ -20,7 +20,7 @@ if (empty($myGuides)) {
     $myGuidesHtml = '<ul>';
     foreach ($myGuides as $guide) {
         $gid = e($guide['id']);
-        $myGuidesHtml .= '<li><a href="guide_detail.php?id=' . $gid . '">' . e($guide['title']) . '</a>'
+        $myGuidesHtml .= '<li><a href="guide_detail.php?id=' . $gid . '">' . en(e($guide['title'])) . '</a>'
             . ' (' . e($guide['champion_name']) . ', ' . e($guide['created_at']) . ')'
             . ' - <a href="edit_guide.php?id=' . $gid . '">Modifica ' . e($guide['title']) . '</a>'
             . '<form action="delete_guide.php" method="post">' . csrf_field()
@@ -45,7 +45,7 @@ if (empty($favorites)) {
 } else {
     $favoritesHtml = '<ul>';
     foreach ($favorites as $fav) {
-        $favoritesHtml .= '<li><a href="guide_detail.php?id=' . e($fav['id']) . '">' . e($fav['title']) . '</a>'
+        $favoritesHtml .= '<li><a href="guide_detail.php?id=' . e($fav['id']) . '">' . en(e($fav['title'])) . '</a>'
             . ' (' . e($fav['champion_name']) . ', di ' . e($fav['author_name']) . ')</li>';
     }
     $favoritesHtml .= '</ul>';

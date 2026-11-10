@@ -9,6 +9,29 @@ function e($value): string
     return htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8');
 }
 
+// Parole inglesi ricorrenti nel sito e nelle guide (gergo di League of Legends).
+// Le espressioni di più parole stanno prima, così vengono riconosciute intere.
+const PAROLE_INGLESI = [
+    'League of Legends', 'Riot Games', 'Rift Academy', 'late game', 'early game', 'team fight',
+    'Top', 'Jungle', 'jungler', 'Mid', 'Bot', 'Support', 'ADC', 'build', 'patch',
+    'community', 'rank', 'matchup', 'wave', 'combo', 'gank', 'ward', 'buff',
+    'burst', 'carry', 'tank', 'roam', 'kite', 'Flash', 'Ultimate', 'password', 'email',
+    'minion', 'Trinity Force',
+];
+
+// Segna le parole inglesi con <span lang="en"> (WCAG 3.1.2): lo screen reader
+// le pronuncia in inglese. Va usata su testo GIA' ESCAPATO con e(): lavora solo
+// su parole intere e non tocca mai un attributo HTML.
+// Esempio: en(e('Fai il gank in Bot')) -> 'Fai il <span lang="en">gank</span> in <span lang="en">Bot</span>'
+function en(string $escapedText): string
+{
+    $alternative = array_map(function ($parola) {
+        return preg_quote($parola, '/');
+    }, PAROLE_INGLESI);
+    $pattern = '/\b(' . implode('|', $alternative) . ')s?\b/iu';
+    return preg_replace($pattern, '<span lang="en">$0</span>', $escapedText);
+}
+
 function redirect(string $url): void
 {
     header('Location: ' . $url);
@@ -54,7 +77,7 @@ function flash_html(): string
     }
     $msg = $_SESSION['flash'];
     unset($_SESSION['flash']);
-    return '<div class="flash" role="status"><p>' . e($msg) . '</p></div>';
+    return '<div class="flash" role="status"><p>' . en(e($msg)) . '</p></div>';
 }
 
 function errors_html(array $errors): string
@@ -64,7 +87,7 @@ function errors_html(array $errors): string
     }
     $items = '';
     foreach ($errors as $err) {
-        $items .= '<li>' . e($err) . '</li>';
+        $items .= '<li>' . en(e($err)) . '</li>';
     }
     return '<div class="form-errors" role="alert"><p>Controlla i dati inseriti:</p><ul>' . $items . '</ul></div>';
 }

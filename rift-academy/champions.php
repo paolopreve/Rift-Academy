@@ -15,7 +15,7 @@ foreach ($roles as $role) {
     if ($isSelected) {
         $roleValid = true;
     }
-    $roleOptionsHtml .= '<option value="' . e($role['id']) . '"' . ($isSelected ? ' selected="selected"' : '') . '>' . e($role['name']) . '</option>';
+    $roleOptionsHtml .= '<option value="' . e($role['id']) . '" lang="en"' . ($isSelected ? ' selected="selected"' : '') . '>' . e($role['name']) . '</option>';
 }
 if (!$roleValid) {
     $selectedRole = 0;
@@ -46,7 +46,7 @@ foreach ($champions as $champion) {
     if ($champion['title'] !== null && $champion['title'] !== '') {
         $championsListHtml .= '<p>' . e($champion['title']) . '</p>';
     }
-    $championsListHtml .= '<p><strong>Ruoli:</strong> ' . e($champion['role_names'] !== null ? $champion['role_names'] : 'non assegnati') . '</p>';
+    $championsListHtml .= '<p><strong>Ruoli:</strong> ' . en(e($champion['role_names'] !== null ? $champion['role_names'] : 'non assegnati')) . '</p>';
     $championsListHtml .= '</article>';
 }
 if ($championsListHtml === '') {
